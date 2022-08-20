@@ -13,6 +13,7 @@ CREATE TABLE user
 	id TEXT PRIMARY KEY NOT NULL,
 	username TEXT NOT NULL,
 	user_password TEXT NOT NULL,
+	active INT NOT NULL DEFAULT 0,
 	time_created TEXT NOT NULL,
 	time_updated TEXT NOT NULL,
 	updated_by TEXT NOT NULL,

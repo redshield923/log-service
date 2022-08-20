@@ -1,4 +1,3 @@
-from xmlrpc.client import Boolean
 from pydantic import BaseModel, Field
 
 class Health(BaseModel):

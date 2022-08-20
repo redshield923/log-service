@@ -7,6 +7,10 @@ name = "pypi"
 npm = "*"
 fastapi = "*"
 uvicorn = "*"
+jwt = "*"
+jose = "*"
+python-jose = "*"
+python-multipart = "*"
 
 [dev-packages]
 

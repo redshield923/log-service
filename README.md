@@ -16,3 +16,16 @@ The basic functionality is:
 Set the following Environment Variables:
 
 'LOGGING_DATABASE_PATH' = The full path of the sqlite3 database to connect to.
+
+# Running the application
+
+The application is split into two parts, the frontend and backend. These are both FastApi projects.
+
+The run the backend: 
+
+```bash
+cd backend
+pipenv shell
+pipenv install --deploy
+pipenv run uvicorn app.main:app --reload
+```

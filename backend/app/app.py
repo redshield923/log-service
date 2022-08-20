@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import sqlite3
-
+from models import responses
 class App:
     
     def __init__(self, version: str, database_path: str):
@@ -22,7 +22,7 @@ class App:
         def __route_index():
             return self.index()
         
-        @self.app.get('/health')
+        @self.app.get('/health', response_model=responses.Health)
         def __route_health():
             return self.health()
     
@@ -31,11 +31,11 @@ class App:
         return self.app
         
     def index(self):
-        return {"Status": 200}
+        return {"Hello": "World"}
     
     def health(self):
         hostname: str = socket.gethostname()
-        res = { "status": 200, "body": {"database_status": 200, "app_status": 200, "hostname": hostname } }
+        res = { "db_health": True, "app_health": True, "hostname": hostname } 
         
         print(f'connecting to database file ${self.database_path}')
         con = sqlite3.connect(self.database_path)

@@ -6,4 +6,8 @@ class Health(BaseModel):
     db_health: bool = Field(..., description="The health of the database")
     hostname: str = Field(..., description="The name of the current host")
     
-    
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+   

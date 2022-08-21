@@ -3,7 +3,7 @@ from hashlib import sha256
 from typing import Union
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from models import response
@@ -20,7 +20,7 @@ class App:
     ALGORITHM: str
     def __init__(self, version: str, database_path: str,secret: str, 
                  access_token_expires_minutes: int = 60, algorithm: str = 'HS256'):
-        self.app: object = FastAPI(version=version)
+        self.app: FastAPI = FastAPI(version=version)
         self.database_path: str = database_path
         self.oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
         self.ACCESS_TOKEN_EXPIRE_MINUTES = access_token_expires_minutes
@@ -50,9 +50,16 @@ class App:
         
         @self.app.get('/user/me')
         def __route_get_current_user(current_user: User = Depends(self.get_current_user)):
-            # current_user = self.get_current_user()
-            # print(current_user)
             return current_user
+        
+    # def __add_routes(self):
+    #     router = APIRouter()
+    #     self.app.include_router(router)
+        
+    #     self.app.add_api_route('/me', self.__route_get_current_user)
+        
+    # def __route_get_current_user(self, current_user: User = Depends(self.get_current_user) ):
+    #     return current_user
         
     def get_app(self):
         return self.app

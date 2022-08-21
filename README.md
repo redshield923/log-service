@@ -29,3 +29,17 @@ pipenv shell
 pipenv install --deploy
 pipenv run uvicorn app.main:app --reload
 ```
+
+# Authentication
+
+Authentication with JWT Tokens has been implemented. To add auth to a route, copy the following:
+
+```python
+        def __route_health(current_user: User = Depends(self.get_current_user)):
+            
+            
+            if current_user.type == 2:
+                return HTTPException(status_code=403)
+            
+            return self.health()
+```

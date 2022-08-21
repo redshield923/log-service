@@ -41,11 +41,6 @@ class App:
         
         @self.app.get('/health', response_model=response.Health)
         def __route_health(current_user: User = Depends(self.get_current_user)):
-            
-            
-            if current_user.username == "benjamin":
-                return HTTPException(status_code=403)
-            
             return self.health()
         
         @self.app.post('/token')

@@ -16,6 +16,10 @@ The basic functionality is:
 Set the following Environment Variables:
 
 'LOGGING_DATABASE_PATH' = The full path of the sqlite3 database to connect to.
+'LOGGING_SECRET' = Secret used by authentication functions. Can be generated via the following:
+```bash
+openssl rand -hex 32
+```
 
 # Running the application
 
@@ -35,11 +39,11 @@ pipenv run uvicorn app.main:app --reload
 Authentication with JWT Tokens has been implemented. To add auth to a route, copy the following:
 
 ```python
-        def __route_health(current_user: User = Depends(self.get_current_user)):
-            
-            
-            if current_user.type == 2:
-                return HTTPException(status_code=403)
-            
-            return self.health()
+def __route_health(current_user: User = Depends(self.get_current_user)):
+    
+    
+    if current_user.type == 2:
+        return HTTPException(status_code=403)
+    
+    return self.health()
 ```

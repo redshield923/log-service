@@ -1,14 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="/Users/benjaminpoole/code/log-service/backend/database/logging-service.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="1884"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><current_table name="4,4:maintest"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="test" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="29"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 1">CREATE TABLE ref_usertype
-(
-	id INTEGER PRIMARY KEY NOT NULL,
-	type TEXT NOT NULL
-)
-
-CREATE TABLE user
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="/Users/benjaminpoole/code/log-service/backend/database/logging-service.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="1884"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><current_table name="4,5:mainfield"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="log" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="18"/><column index="2" value="53"/><column index="3" value="82"/><column index="4" value="43"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table><table schema="main" name="test" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="29"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="SQL 1">CREATE TABLE user
 (
 	id TEXT PRIMARY KEY NOT NULL,
 	username TEXT NOT NULL,
 	user_password TEXT NOT NULL,
+	active INT NOT NULL DEFAULT 0,
 	time_created TEXT NOT NULL,
 	time_updated TEXT NOT NULL,
 	updated_by TEXT NOT NULL,
@@ -17,35 +12,7 @@ CREATE TABLE user
 	CONSTRAINT typ_fk FOREIGN KEY (type) REFERENCES ref_usertype (id)
 )
 
-CREATE TABLE log_index
-(
-	id TEXT NOT NULL PRIMARY KEY,
-	name TEXT NOT NULL,
-	time_created TEXT NOT NULL,
-	time_updated TEXT NOT NULL,
-	updated_by TEXT NOT NULL,
-    CONSTRAINT uptd_by_fk	FOREIGN KEY (updated_by) REFERENCES user (id)
-)
+insert into ref_usertype values (1, &quot;User&quot;), (2, &quot;Admin&quot;) ,(3, &quot;SuperAdmin&quot;)
 
-
-CREATE TABLE field
-(
-	id TEXT NOT NULL PRIMARY KEY,
-	log_id TEXT NOT NULL,
-	name TEXT NOT NULL,
-	payload TEXT NOT NULL,
-	time_created TEXT NOT NULL,
-	time_updated TEXT NOT NULL,
-	updated_by TEXT NOT NULL,
-	 CONSTRAINT uptd_by_fk	FOREIGN KEY (updated_by) REFERENCES user (id),
-	 CONSTRAINT lg_id_fk	FOREIGN KEY (log_id) REFERENCES log_index (id)
-)
-
-CREATE TABLE log 
-(
-	id TEXT NOT NULL PRIMARY KEY,
-	index_id TEXT NOT NULL,
-	time_ingested TEXT NOT NULL, 
-	source TEXT NOT NULL,
-	CONSTRAINT indx_id_fk FOREIGN KEY (index_id) REFERENCES log_index (id)
-)</sql><current_tab id="0"/></tab_sql></sqlb_project>
+insert into user VALUES
+(100, &quot;benjamin&quot;, &quot;5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8&quot;, 1, datetime(), datetime(), 100, 2)</sql><current_tab id="0"/></tab_sql></sqlb_project>

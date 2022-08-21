@@ -11,6 +11,7 @@ jwt = "*"
 jose = "*"
 python-jose = "*"
 python-multipart = "*"
+pylint = "*"
 
 [dev-packages]
 

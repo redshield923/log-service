@@ -12,6 +12,3 @@ class User(BaseModel):
     time_updated: datetime
     updated_by: str
     type: int
-
-    
-    

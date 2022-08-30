@@ -12,6 +12,7 @@ jose = "*"
 python-jose = "*"
 python-multipart = "*"
 pylint = "*"
+sqlalchemy = "*"
 
 [dev-packages]
 

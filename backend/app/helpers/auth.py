@@ -1,5 +1,4 @@
 import sys
-sys.path.append("..")
 from datetime import datetime, timedelta
 from hashlib import sha256
 from typing import Union

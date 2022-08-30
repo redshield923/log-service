@@ -50,3 +50,25 @@ CREATE TABLE log
 	source TEXT NOT NULL,
 	CONSTRAINT indx_id_fk FOREIGN KEY (index_id) REFERENCES log_index (id)
 )
+
+
+
+CREATE TABLE "user" (
+	"id"	INTEGER,
+	"username"	TEXT NOT NULL,
+	"password"	TEXT NOT NULL,
+	"active"	INT NOT NULL DEFAULT 0,
+	"time_created"	TEXT NOT NULL,
+	"time_updated"	TEXT NOT NULL,
+	"updated_by"	int NOT NULL,
+	"type"	INTEGER NOT NULL,
+	PRIMARY KEY("id" AUTOINCREMENT),
+	CONSTRAINT "updtd_by_fk" FOREIGN KEY("updated_by") REFERENCES "user"("id"),
+	CONSTRAINT "typ_fk" FOREIGN KEY("type") REFERENCES "ref_usertype"("id")
+);
+
+CREATE TABLE "ref_usertype" (
+	"id"	INTEGER,
+	"type"	TEXT NOT NULL,
+	PRIMARY KEY("id" AUTOINCREMENT)
+);

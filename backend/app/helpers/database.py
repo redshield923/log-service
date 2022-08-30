@@ -1,12 +1,12 @@
-    
 import sqlite3
-
+from this import d
 
 class DatabaseHelper:
     
-    database_path: str    
+    database_path: str
+        
     def __init__(self, database_path: str):
-        self.database_path = database_path
+        self.database_path = database_path 
 
     def get_database_connection(self):
         con = sqlite3.connect(self.database_path)
@@ -14,5 +14,4 @@ class DatabaseHelper:
         cur = con.cursor()
         
         return con, cur
-    
     

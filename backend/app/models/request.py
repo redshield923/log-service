@@ -12,3 +12,8 @@ class User(BaseModel):
     time_updated: datetime
     updated_by: str
     type: int
+    
+class LogPayload(BaseModel):
+    index: str
+    source: str
+    payload: object

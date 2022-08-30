@@ -1,16 +1,19 @@
 import socket, sqlite3
+import os
 from datetime import timedelta
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
+from models.database import Index
 from models import response
 from models import request
 from models.database import User
 from helpers.auth import AuthHelper
 from helpers.database import DatabaseHelper
+from helpers.log import LogHelper
 from config import Config
 
-app: FastAPI = FastAPI(version='0.0.1')
+app = FastAPI(version='0.0.1')
 
 app.add_middleware(
     CORSMiddleware,
@@ -22,6 +25,7 @@ app.add_middleware(
 
 databaseHelper = DatabaseHelper(Config.database_path)
 authHelper = AuthHelper(Config.SECRET, Config.ALGORITHM, databaseHelper)
+logHelper = LogHelper(databaseHelper)
 
 @app.get('/')     
 def index():
@@ -32,7 +36,7 @@ def health(current_user: User = Depends( authHelper.get_current_user)):
     hostname: str = socket.gethostname()
     res = { "db_health": True, "app_health": True, "hostname": hostname } 
     database_health = True
-    print(f'connecting to database file ${ database_path}')
+    print(f'connecting to database file ${Config.database_path}')
     con, cur =  databaseHelper.get_database_connection()
     
     try:
@@ -69,6 +73,18 @@ def token(form_data: OAuth2PasswordRequestForm = Depends()):
 def get_current_user(current_user: request.User = Depends(authHelper.get_current_user)):
     return current_user
 
-# @app.post('/index/{index}')
-# def index(index: str, current_user: request.User = Depends( authHelper.get_current_user)):
-#     return   authHelper.ingest_log(index)
+@app.post('/ingest/')
+def index(payload: request.LogPayload, current_user: request.User = Depends( authHelper.get_current_user)):
+    
+    print(payload.payload)
+    index: Index = logHelper.create_if_not_exists(payload.index, current_user.id)
+    
+    fields_unpacked = logHelper.ingest_log(index=payload.index, source=payload.source, payload=payload.payload)
+    
+    return {'success': True, 'fields_unpacked': fields_unpacked}
+    
+@app.get("/logs/{index}")
+def get_logs(index: str, current_user: request.User = Depends( authHelper.get_current_user)):
+    
+    
+    return logHelper.retrieve_index(index)

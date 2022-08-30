@@ -1,56 +1,13 @@
-/*
-Scripts for creating the database from scratch.
-*/
+CREATE TABLE "ref_usertype" (
+	"id"	INTEGER,
+	"type"	TEXT NOT NULL,
+	PRIMARY KEY("id" AUTOINCREMENT)
+);
 
-CREATE TABLE ref_usertype
-(
-	id INT PRIMARY KEY,
-	type TEXT NOT NULL
-)
+insert into ref_usertype (type) VALUES ('user')
+insert into ref_usertype (type) VALUES ('admin')
 
-CREATE TABLE user
-(
-	id INT PRIMARY KEY,
-	username TEXT NOT NULL,
-	password TEXT NOT NULL,
-	active INT NOT NULL DEFAULT 0,
-	time_created TEXT NOT NULL,
-	time_updated TEXT NOT NULL,
-	updated_by TEXT NOT NULL,
-	type INTEGER NOT NULL,
-	CONSTRAINT updtd_by_fk FOREIGN KEY (updated_by) REFERENCES user(id)
-	CONSTRAINT typ_fk FOREIGN KEY (type) REFERENCES ref_usertype (id)
-)
-
-CREATE TABLE log_index
-(
-	id INT PRIMARY KEY,
-	name TEXT NOT NULL,
-	time_created TEXT NOT NULL,
-	time_updated TEXT NOT NULL,
-	updated_by TEXT NOT NULL,
-    CONSTRAINT uptd_by_fk	FOREIGN KEY (updated_by) REFERENCES user (id)
-)
-
-
-CREATE TABLE field
-(
-	id INT PRIMARY KEY,
-	log_id TEXT NOT NULL,
-	name TEXT NOT NULL,
-	payload TEXT NOT NULL,
-	CONSTRAINT lg_id_fk	FOREIGN KEY (log_id) REFERENCES log_index (id)
-)
-
-CREATE TABLE log 
-(
-	id INT PRIMARY KEY,
-	index_id TEXT NOT NULL,
-	time_ingested TEXT NOT NULL, 
-	source TEXT NOT NULL,
-	CONSTRAINT indx_id_fk FOREIGN KEY (index_id) REFERENCES log_index (id)
-)
-
+insert into ref_usertype (type) VALUES ('superadmin')
 
 
 CREATE TABLE "user" (
@@ -63,12 +20,36 @@ CREATE TABLE "user" (
 	"updated_by"	int NOT NULL,
 	"type"	INTEGER NOT NULL,
 	PRIMARY KEY("id" AUTOINCREMENT),
-	CONSTRAINT "updtd_by_fk" FOREIGN KEY("updated_by") REFERENCES "user"("id"),
-	CONSTRAINT "typ_fk" FOREIGN KEY("type") REFERENCES "ref_usertype"("id")
+	CONSTRAINT "typ_fk" FOREIGN KEY("type") REFERENCES "ref_usertype"("id"),
+	CONSTRAINT "updtd_by_fk" FOREIGN KEY("updated_by") REFERENCES "user"("id")
 );
 
-CREATE TABLE "ref_usertype" (
-	"id"	INTEGER,
-	"type"	TEXT NOT NULL,
-	PRIMARY KEY("id" AUTOINCREMENT)
+CREATE TABLE "log_index" (
+	"name"	TEXT,
+	"time_created"	TEXT NOT NULL,
+	"time_updated"	TEXT NOT NULL,
+	"updated_by"	int NOT NULL,
+	PRIMARY KEY("name"),
+	CONSTRAINT "uptd_by_fk" FOREIGN KEY("updated_by") REFERENCES "user"("id")
 );
+
+CREATE TABLE "log" (
+	"id"	INTEGER,
+	"index_name"	text NOT NULL,
+	"time_ingested"	TEXT NOT NULL,
+	"source"	TEXT NOT NULL,
+	PRIMARY KEY("id" AUTOINCREMENT),
+	CONSTRAINT "indx_id_fk" FOREIGN KEY("index_name") REFERENCES "log_index"("name")
+);
+
+CREATE TABLE "field" (
+	"id"	INTEGER,
+	"log_id"	int NOT NULL,
+	"name"	TEXT NOT NULL,
+	"payload"	TEXT NOT NULL,
+	PRIMARY KEY("id" AUTOINCREMENT),
+	CONSTRAINT "lg_id_fk" FOREIGN KEY("log_id") REFERENCES "log"("id")
+);
+
+insert into user (id, username, password, active, time_created, time_updated, updated_by, type) values
+ (1,'benjamin', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 1, julianday('now'), julianday('now'), 1, 2)

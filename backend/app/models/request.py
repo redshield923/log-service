@@ -17,3 +17,6 @@ class LogPayload(BaseModel):
     index: str
     source: str
     payload: object
+    
+class IndexPatternPayload(BaseModel):
+    index_pattern: str

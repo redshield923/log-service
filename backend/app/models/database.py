@@ -25,6 +25,7 @@ class Index(BaseModel):
     
 class LogResult(BaseModel):
     id: int
+    index_name: str
     field: str
     messaage: str
     timestamp: datetime

@@ -1,28 +1,33 @@
-from pickle import FALSE
 import socket
 import sqlite3
-import os
 from datetime import timedelta
 from turtle import st
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
-from models.database import Index
-from models import response
-from models import request
-from models.database import User
-from helpers.auth import AuthHelper
-from helpers.database import DatabaseHelper
-from helpers.log import LogHelper
-from config import Config
+from .models.database import Index
+from .models import response
+from .models import request
+from .models.database import User
+from .helpers.auth import AuthHelper
+from .helpers.database import DatabaseHelper
+from .helpers.log import LogHelper
+from .config import Config
+
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
+
+templates = Jinja2Templates(directory="app/templates")
+
 
 app = FastAPI(version='0.0.1')
-
+app.mount("/static", StaticFiles(directory="static"), name="static")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"]
 )
 
@@ -32,8 +37,8 @@ logHelper = LogHelper(databaseHelper)
 
 
 @app.get('/')
-def index():
-    return {"Hello": "World"}
+def index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 
 @app.get('/health', response_model=response.Health)
@@ -61,8 +66,8 @@ def health(current_user: User = Depends(authHelper.get_current_user)):
     return res
 
 
-@app.post('/token')
-def token(form_data: OAuth2PasswordRequestForm = Depends()):
+@app.post('/token', status_code=200)
+def token(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
     print(form_data)
     user: User = authHelper.authenticate_user(
         form_data.username, form_data.password)
@@ -75,8 +80,10 @@ def token(form_data: OAuth2PasswordRequestForm = Depends()):
     access_token = authHelper.create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
-
-    return {"access_token": access_token, "token_type": "bearer"}
+    response.status_code = status.HTTP_200_OK
+    response.set_cookie('LOGGING_SERVICE_TOKEN', access_token,
+                        httponly=True, secure=True, samesite='none')
+    return {"access_token": access_token, "token_type": "bearer", 'access_token_expires': access_token_expires}
 
 
 @app.get('/user/me')
@@ -101,25 +108,30 @@ def index(payload: request.LogPayload, current_user: request.User = Depends(auth
 def get_logs(index: str, current_user: request.User = Depends(authHelper.get_current_user)):
     return logHelper.retrieve_index(index)
 
+
 @app.get("/index/")
 def get_logs(current_user: request.User = Depends(authHelper.get_current_user)):
     return logHelper.retrieve_all_indexes()
 
+
 def validate_index_pattern(index_pattern: str):
-    
+
     error: HTTPException = None
-    
+
     if '*' not in index_pattern:
-        error = HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Index Pattern must contain asterisk")
+        error = HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                              detail="Index Pattern must contain asterisk")
 
+    if index_pattern.count('*') == 1 and not (index_pattern.startswith('*') or index_pattern.endswith('*')):
+        error = HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                              detail="If two wildcards are supplied, they must be at the start and end.")
 
-    if index_pattern.count('*') == 1 and not(index_pattern.startswith('*') or index_pattern.endswith('*')):
-        error = HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="If two wildcards are supplied, they must be at the start and end.")
-    
-    if index_pattern.count('*') == 2 and not(index_pattern.startswith('*') and index_pattern.endswith('*')):
-        error =  HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="If two wildcards are supplied, they must be at the start and end.")
+    if index_pattern.count('*') == 2 and not (index_pattern.startswith('*') and index_pattern.endswith('*')):
+        error = HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                              detail="If two wildcards are supplied, they must be at the start and end.")
     if index_pattern.count('*') > 2:
-        error = HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Index Pattern must contain no more than two asterisk")
+        error = HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                              detail="Index Pattern must contain no more than two asterisk")
 
     return index_pattern.replace('*', '%'), error
 
@@ -128,9 +140,9 @@ def validate_index_pattern(index_pattern: str):
 def get_logs(request: request.IndexPatternPayload, current_user: request.User = Depends(authHelper.get_current_user)):
 
     search_term, error = validate_index_pattern(request.index_pattern)
-    
+
     print(search_term)
-    
+
     if error:
         return error
 
@@ -139,15 +151,14 @@ def get_logs(request: request.IndexPatternPayload, current_user: request.User = 
 
 @app.delete("/index/{index}")
 def delete_index(index: str, current_user: request.User = Depends(authHelper.get_current_user)):
-    
+
     # Only admins can delete indexes.
     if current_user.type == 1:
         return HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform this action.")
-    
+
     if not logHelper.index_if_exist(index=index):
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Index not found.")
-    
+
     logHelper.delete_index(index)
-    
+
     return status.HTTP_204_NO_CONTENT
-    

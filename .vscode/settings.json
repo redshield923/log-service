@@ -1,0 +1,7 @@
+{
+    "prettier.enable": true,
+    "editor.formatOnSave": true,
+    "[javascriptreact|javascript|jsx]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    }
+}

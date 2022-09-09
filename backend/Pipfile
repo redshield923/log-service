@@ -13,6 +13,7 @@ python-jose = "*"
 python-multipart = "*"
 pylint = "*"
 sqlalchemy = "*"
+jinja2 = "*"
 
 [dev-packages]
 

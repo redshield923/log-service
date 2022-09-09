@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 from hashlib import sha256
 from typing import Union
 from .database import DatabaseHelper
-from models.auth import TokenData
-from models.database import User
+from ..models.auth import TokenData
+from ..models.database import User
 from jose import jwt, JWTError
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -13,17 +13,16 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 class AuthHelper:
-    
+
     secret: str
     algorithm: str
     databaseHelper: DatabaseHelper
-    
+
     def __init__(self, secret: str, algorithm: str, databaseHelper: DatabaseHelper):
-        
+
         self.secret = secret
         self.algorithm = algorithm
         self.databaseHelper = databaseHelper
-
 
     def get_user(self, username: str):
         find_user_sql = "SELECT * FROM user WHERE username = ?"
@@ -32,11 +31,11 @@ class AuthHelper:
         user_response = cur.fetchall()
         user_dict: User = dict(user_response[0])
         con.close()
-        
+
         if user_response is None:
             return None
         return User(**user_dict)
-                
+
     def authenticate_user(self, username: str, password: str):
         user = self.get_user(username)
         if not user:
@@ -45,7 +44,6 @@ class AuthHelper:
             return False
         return user
 
-
     def create_access_token(self, data: dict, expires_delta: Union[timedelta, None] = None):
         to_encode = data.copy()
         if expires_delta:
@@ -53,7 +51,8 @@ class AuthHelper:
         else:
             expire = datetime.utcnow() + timedelta(minutes=15)
         to_encode.update({"exp": expire})
-        encoded_jwt = jwt.encode(to_encode, self.secret, algorithm=self.algorithm)
+        encoded_jwt = jwt.encode(
+            to_encode, self.secret, algorithm=self.algorithm)
         return encoded_jwt
 
     def get_current_user(self, token: str = Depends(oauth2_scheme)):
@@ -63,9 +62,10 @@ class AuthHelper:
             headers={"WWW-Authenticate": "Bearer"},
         )
         try:
-            payload = jwt.decode(token, self.secret, algorithms=[self.algorithm])
+            payload = jwt.decode(token, self.secret,
+                                 algorithms=[self.algorithm])
             username: str = payload.get("sub")
-            
+
             if username is None:
                 raise credentials_exception
             token_data = TokenData(username=username)

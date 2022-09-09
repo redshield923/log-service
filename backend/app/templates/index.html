@@ -5,21 +5,11 @@
   </head>
   <body>
     <h1 id='username'><h2>
-    <button id="all-indexes">View all Indexes</button>
-    <button id="index-search">View Index Contents</button>
-    <button id="index-pattern-search">View Index Contents by Pattern</button>
-    <button id="delete-index">Delete Index</button>
-    <button id="user-information">View my User Information</button>
-    <table>
-      <tr>
-        <th>Name</th>
-        <th>Created</th>
-        <th>Updated</th>
-        <th>Updated By</th>
-      </tr>
-      <tr
-    </table>
-
+    <button id="all-indexes">View all Indexes</button><br>
+    <button id="index-search">View Index Contents</button><br>
+    <button id="index-pattern-search">View Index Contents by Pattern</button><br>
+    <button id="delete-index">Delete Index</button><br>
+    <button id="user-information">View my User Information</button><br>
   </body>
 </html>
 
@@ -224,5 +214,119 @@
     document.getElementById("delete-index").addEventListener('click', deleteIndex)
 
     
-    window.onload = start()
+    document.onload = start()
 </script>
+<style>
+    body{
+        background-color: black;
+        color: green;
+        font-family: monospace, sans-serif;
+
+    }
+    h1{
+        text-align: center;
+        font-size: 70px;
+    }
+    h2{
+        text-align: center;
+    }
+    h3{
+        font-size: 40px;
+    }
+    p{
+        font-size: 25px;
+        color: darkgreen;
+        text-align: center;
+    }
+
+
+    button{
+        align-items: center;
+        background-color: black;
+        font-size: 50px;
+        border: black;
+        color: green;
+        font-family: monospace, sans-serif;
+    }
+
+    .options button{
+        font-size: 35px;
+        width: 100%;
+        display: block;
+        text-align: center;
+        margin: auto;
+    }
+
+    .options button:hover{
+        background-color: darkgrey;
+    }
+
+    #artists{
+        font-size: 35px;
+        text-align: center;
+    }
+
+    #artists h3{
+        font-size: 45px;
+    }
+
+    #artists button:hover{
+        background-color: darkgrey;
+    }
+
+    #artists a{
+        text-decoration: none;
+        color: darkgreen;
+    }
+
+    #playlists button{
+        font-size: 35px;
+        border: 1px solid black; /* Green border */
+        padding: 10px 24px; /* Some padding */
+        cursor: pointer; /* Pointer/hand icon */
+        width: 100%; /* Set a width if needed */
+        display: block; /* Make the buttons appear below each other */
+        }
+
+    #playlists button:not(:last-child) {
+    border-bottom: none; /* Prevent double borders */
+    }
+
+    /* Add a background color on hover */
+    #playlists button:hover {
+    background-color: darkgrey;
+
+    }
+    #songs a:hover {
+    background-color: darkgrey;
+
+    }
+    #songs a{
+        font-size: 35px;
+        color: green;
+         /* Green background */
+        border: 1px solid black; /* Green border */
+        padding: 10px 24px; /* Some padding */
+        cursor: pointer; /* Pointer/hand icon */
+        width: 100%; /* Set a width if needed */
+        display: block; /* Make the buttons appear below each other */
+        text-decoration: none;
+    }
+
+
+    .container {
+        text-align: center;
+
+        display: flex;
+        }
+
+    .left-half {
+            flex: 1;
+        padding: 1rem;
+        }
+
+    .right-half {
+        flex: 1;
+        padding: 1rem;
+        }
+</style>

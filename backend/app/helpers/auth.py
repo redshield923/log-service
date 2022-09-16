@@ -29,11 +29,14 @@ class AuthHelper:
         con, cur = self.databaseHelper.get_database_connection()
         cur.execute(find_user_sql, [username])
         user_response = cur.fetchall()
+
+        print(user_response)
+        if len(user_response) == 0:
+            return None
+
         user_dict: User = dict(user_response[0])
         con.close()
 
-        if user_response is None:
-            return None
         return User(**user_dict)
 
     def authenticate_user(self, username: str, password: str):

@@ -1,3 +1,5 @@
+from hashlib import sha256
+import re
 import socket
 import sqlite3
 from datetime import timedelta
@@ -12,6 +14,7 @@ from .models.database import User
 from .helpers.auth import AuthHelper
 from .helpers.database import DatabaseHelper
 from .helpers.log import LogHelper
+from .helpers.user import UserHelper
 from .config import Config
 
 from fastapi.staticfiles import StaticFiles
@@ -34,6 +37,7 @@ app.add_middleware(
 databaseHelper = DatabaseHelper(Config.database_path)
 authHelper = AuthHelper(Config.SECRET, Config.ALGORITHM, databaseHelper)
 logHelper = LogHelper(databaseHelper)
+userHelper = UserHelper(databaseHelper)
 
 
 @app.get('/')
@@ -162,3 +166,37 @@ def delete_index(index: str, current_user: request.User = Depends(authHelper.get
     logHelper.delete_index(index)
 
     return status.HTTP_204_NO_CONTENT
+
+
+# User actions
+
+@app.post("/user")
+def create_user(request: request.NewUser, current_user: request.User = Depends(authHelper.get_current_user)):
+
+    # Only admins can create new users.
+    if current_user.type == 1:
+        return HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform this action.")
+
+    success = userHelper.create_new_users(
+        request.username, sha256(request.user_password.encode('utf-8')).hexdigest(), current_user.id, request.type)
+
+    if success:
+        return {"success": True}
+
+    return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="An error occured whilst creating a new user. This username may already exist.")
+
+
+@app.put('/password')
+def update_password(request: request.UpdatePassword, current_user: request.User = Depends(authHelper.get_current_user)):
+
+    # Only admins can create new users.
+    if current_user.type == 1:
+        return HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform this action.")
+
+    success = userHelper.update_password(
+        request.username, sha256(request.password.encode('utf-8')).hexdigest())
+
+    if success:
+        return {"success": True}
+
+    return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="An error occured whilst updating user password. This username may already exist.")

@@ -1,12 +1,9 @@
 from calendar import c
-import re
 from signal import pause
-import sqlite3
 from typing import List
 
 from .database import DatabaseHelper
 from ..models.database import Index, LogResult
-import json
 
 
 class LogHelper:

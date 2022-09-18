@@ -189,12 +189,28 @@ def create_user(request: request.NewUser, current_user: request.User = Depends(a
 @app.put('/password')
 def update_password(request: request.UpdatePassword, current_user: request.User = Depends(authHelper.get_current_user)):
 
-    # Only admins can create new users.
+    # Only admins can reset passwords.
     if current_user.type == 1:
         return HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform this action.")
 
     success = userHelper.update_password(
         request.username, sha256(request.password.encode('utf-8')).hexdigest())
+
+    if success:
+        return {"success": True}
+
+    return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="An error occured whilst updating user password. This username may already exist.")
+
+
+@app.delete('/user/{username}')
+def delete_user(username: str, current_user: request.User = Depends(authHelper.get_current_user)):
+
+    # Only admins can delete users.
+    if current_user.type == 1:
+        return HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform this action.")
+
+    success = userHelper.delete_user(
+        username)
 
     if success:
         return {"success": True}

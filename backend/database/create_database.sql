@@ -12,7 +12,7 @@ insert into ref_usertype (type) VALUES ('superadmin')
 
 CREATE TABLE "user" (
 	"id"	INTEGER,
-	"username"	TEXT NOT NULL,
+	"username"	TEXT NOT NULL UNIQUE,
 	"password"	TEXT NOT NULL,
 	"active"	INT NOT NULL DEFAULT 0,
 	"time_created"	TEXT NOT NULL,

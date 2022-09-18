@@ -52,3 +52,24 @@ class UserHelper:
         con.close()
 
         return True
+
+    def delete_user(self, username: str):
+
+        con, cur = self.databaseHelper.get_database_connection()
+
+        delete_user_password_sql = """
+            DELETE FROM user WHERE username = ?
+        """
+
+        try:
+
+            cur.execute(delete_user_password_sql,
+                        (username,))
+            con.commit()
+        except Exception as e:
+            print(e)
+            return False
+
+        con.close()
+
+        return True

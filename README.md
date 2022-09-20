@@ -10,6 +10,50 @@ The basic functionality is:
 - Delete logs (admin users only)
 - 
 
+# Set up
+
+This application is written in python. To install all dependecies, run:
+
+```bash
+pip install -r requirements.txt 
+```
+
+Note: if running in a virtualenv, see instructions below
+
+# Running the application
+
+The application can be run with 
+
+```bash
+./run.sh
+```
+
+from /app. Note you may need to:
+
+```bash
+chmod +X ./run.sh
+```
+
+on first use.
+
+
+To run manually...
+
+# Testing
+
+Tests can be run with 
+
+```bash
+./test.sh
+```
+
+from /app. Note you may need to:
+
+```bash
+chmod +X ./test.sh
+```
+
+on first use.
 
 # Set up
 
@@ -21,11 +65,8 @@ Set the following Environment Variables:
 openssl rand -hex 32
 ```
 
-# Running the application
 
-The application is split into two parts, the frontend and backend. These are both FastApi projects.
-
-The run the backend: 
+Then run with 
 
 ```bash
 cd backend
@@ -46,4 +87,18 @@ def __route_health(current_user: User = Depends(self.get_current_user)):
         return HTTPException(status_code=403)
     
     return self.health()
+```
+
+# PipEnv Virtual Environment
+To run inside of a virtual environment, run the following commands (requires python 3.8 or above ):
+
+```bash
+cd app
+pipenv activate
+pipenv shell
+
+# You should now be in a virtualenv shell
+
+./run.sh
+
 ```

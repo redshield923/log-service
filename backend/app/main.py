@@ -15,7 +15,7 @@ from .helpers.auth import AuthHelper
 from .helpers.database import DatabaseHelper
 from .helpers.log import LogHelper
 from .helpers.user import UserHelper
-from .config import Config
+from .config.config import Config
 
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -34,7 +34,7 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-databaseHelper = DatabaseHelper(Config.database_path)
+databaseHelper = DatabaseHelper(Config.DATABASE_PATH)
 authHelper = AuthHelper(Config.SECRET, Config.ALGORITHM, databaseHelper)
 logHelper = LogHelper(databaseHelper)
 userHelper = UserHelper(databaseHelper)
@@ -50,7 +50,7 @@ def health(current_user: User = Depends(authHelper.get_current_user)):
     hostname: str = socket.gethostname()
     res = {"db_health": True, "app_health": True, "hostname": hostname}
     database_health = True
-    print(f'connecting to database file ${Config.database_path}')
+    print(f'connecting to database file ${Config.DATABASE_PATH}')
     con, cur = databaseHelper.get_database_connection()
 
     try:

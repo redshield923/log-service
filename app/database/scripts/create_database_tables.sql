@@ -4,12 +4,6 @@ CREATE TABLE "ref_usertype" (
 	PRIMARY KEY("id" AUTOINCREMENT)
 );
 
-insert into ref_usertype (type) VALUES ('user')
-insert into ref_usertype (type) VALUES ('admin')
-
-insert into ref_usertype (type) VALUES ('superadmin')
-
-
 CREATE TABLE "user" (
 	"id"	INTEGER,
 	"username"	TEXT NOT NULL UNIQUE,
@@ -51,5 +45,3 @@ CREATE TABLE "field" (
 	CONSTRAINT "lg_id_fk" FOREIGN KEY("log_id") REFERENCES "log"("id")
 );
 
-insert into user (id, username, password, active, time_created, time_updated, updated_by, type) values
- (1,'benjamin', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 1, julianday('now'), julianday('now'), 1, 2)

@@ -1,5 +1,5 @@
 from .database import DatabaseHelper
-from ..models.database import User
+from models.database import User
 
 
 class UserHelper:

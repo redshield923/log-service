@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 from hashlib import sha256
 from typing import Union
 from .database import DatabaseHelper
-from ..models.auth import TokenData
-from ..models.database import User
+from models.auth import TokenData
+from models.database import User
 from jose import jwt, JWTError
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm

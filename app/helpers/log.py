@@ -3,7 +3,7 @@ from signal import pause
 from typing import List
 
 from .database import DatabaseHelper
-from ..models.database import Index, LogResult
+from models.database import Index, LogResult
 
 
 class LogHelper:

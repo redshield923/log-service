@@ -7,21 +7,21 @@ from turtle import st
 from fastapi import FastAPI, Depends, HTTPException, status, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
-from .models.database import Index
-from .models import response
-from .models import request
-from .models.database import User
-from .helpers.auth import AuthHelper
-from .helpers.database import DatabaseHelper
-from .helpers.log import LogHelper
-from .helpers.user import UserHelper
-from .config.config import Config
+from models.database import Index
+from models import response
+from models import request
+from models.database import User
+from helpers.auth import AuthHelper
+from helpers.database import DatabaseHelper
+from helpers.log import LogHelper
+from helpers.user import UserHelper
+from config.config import Config
 
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 
-templates = Jinja2Templates(directory="app/templates")
+templates = Jinja2Templates(directory="templates")
 
 
 app = FastAPI(version='0.0.1')

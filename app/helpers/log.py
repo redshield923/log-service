@@ -1,5 +1,6 @@
 from calendar import c
 from signal import pause
+import sqlite3
 from typing import List
 
 from .database import DatabaseHelper
@@ -12,6 +13,35 @@ class LogHelper:
 
     def __init__(self, databaseHelper: DatabaseHelper):
         self.databaseHelper = databaseHelper
+
+    def ingest_log(self, index: str, source: str, payload):
+        # insert a log
+        # get§
+
+        con, cur = self.databaseHelper.get_database_connection()
+
+        create_new_log_sql = "INSERT INTO log (index_name, time_ingested, source) VALUES (?, julianday('now'), ?)"
+        try:
+
+            cur.execute(create_new_log_sql, (index, source))
+
+        except sqlite3.IntegrityError as err:
+            con.close()
+            print(err)
+            raise err
+        log_id = cur.lastrowid
+        con.commit()
+
+        # Parse json and insert a field for each key/value pair
+
+        for k, v in payload.items():
+            create_new_field_sql = "INSERT INTO field (log_id, name, payload) VALUES (?, ?, ?)"
+            cur.execute(create_new_field_sql, (log_id, k, v))
+            con.commit()
+
+        con.close()
+
+        return len(payload.items())
 
     def retrieve_all_indexes(self):
         con, cur = self.databaseHelper.get_database_connection()
@@ -34,66 +64,46 @@ class LogHelper:
 
         return index_result
 
-    def index_if_exist(self, index: str):
-
-        con, cur = self.databaseHelper.get_database_connection()
-
-        find_index_sql = "SELECT * FROM log_index WHERE name = ?"
-
-        cur.execute(find_index_sql, (index,))
-        res: Index = cur.fetchone()
-        print()
-        print(res)
-        con.close()
-        if not res:
-            return False
-
-        return res
-
     def create_index(self, index_name: str, user: int):
 
         con, cur = self.databaseHelper.get_database_connection()
 
         create_index_sql = "INSERT INTO log_index VALUES ( ?, julianday('now'), julianday('now'), ?)"
-        cur.execute(create_index_sql, (index_name, user,))
+
+        try:
+
+            cur.execute(create_index_sql, (index_name, user,))
+
+        except sqlite3.IntegrityError as err:
+            con.close()
+
+            print(err)
+            raise err
         last_row_id = cur.lastrowid
         con.commit()
+
         cur.execute('SELECT * FROM log_index WHERE rowid = ?', (last_row_id,))
         inserted_row = cur.fetchone()
         con.commit()
         con.close()
+
         return inserted_row
 
     def create_if_not_exists(self, index_name: str, user_id: int):
 
-        index = self.index_if_exist(index_name)
-
-        if index:
-            return index
-
-        return self.create_index(index_name, user_id)
-
-    def ingest_log(self, index: str, source: str, payload):
-        # insert a log
-        # get§
-
         con, cur = self.databaseHelper.get_database_connection()
 
-        create_new_log_sql = "INSERT INTO log (index_name, time_ingested, source) VALUES (?, julianday('now'), ?)"
-        cur.execute(create_new_log_sql, (index, source))
-        log_id = cur.lastrowid
-        con.commit()
+        find_index_sql = "SELECT * FROM log_index WHERE name = ?"
 
-        # Parse json and insert a field for each key/value pair
-
-        for k, v in payload.items():
-            create_new_field_sql = "INSERT INTO field (log_id, name, payload) VALUES (?, ?, ?)"
-            cur.execute(create_new_field_sql, (log_id, k, v))
-            con.commit()
-
+        cur.execute(find_index_sql, (index_name,))
+        res: Index = cur.fetchone()
+        print()
+        print(res)
         con.close()
+        if not res:
+            return self.create_index(index_name, user_id)
 
-        return len(payload.items())
+        return False
 
     def retrieve_index(self, index: str):
 
@@ -114,7 +124,7 @@ class LogHelper:
         con.close()
 
         if not res:
-            return "No logs exist under this index yet! Hit /ingest to fix that!"
+            return False
 
         index_result: List[LogResult] = []
 
@@ -124,6 +134,7 @@ class LogHelper:
 
             index_result.append(formatted_row)
 
+        print(index_result)
         return index_result
 
     def retrieve_index_by_pattern(self, search: str, ):
@@ -143,8 +154,6 @@ class LogHelper:
         res = cur.fetchall()
 
         con.close()
-
-        results = {}
 
         if not res:
             return False

@@ -3,5 +3,10 @@
     "editor.formatOnSave": true,
     "[javascriptreact|javascript|jsx]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
-    }
+    },
+    "python.testing.pytestArgs": [
+        "."
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }

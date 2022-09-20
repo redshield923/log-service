@@ -1,5 +1,4 @@
 #!/bin/bash
-
 TEST_DB_PATH="$(pwd)/database/test.db"
 if [ -f $TEST_DB_PATH ] ; then
     rm $TEST_DB_PATH

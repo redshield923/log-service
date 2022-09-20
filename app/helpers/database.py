@@ -12,5 +12,5 @@ class DatabaseHelper:
         con = sqlite3.connect(self.database_path)
         con.row_factory = sqlite3.Row
         cur = con.cursor()
-
+        cur.execute("PRAGMA foreign_keys = ON")
         return con, cur

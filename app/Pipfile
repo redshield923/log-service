@@ -15,6 +15,7 @@ pylint = "*"
 sqlalchemy = "*"
 jinja2 = "*"
 pytest = "*"
+pygount = "*"
 
 [dev-packages]
 

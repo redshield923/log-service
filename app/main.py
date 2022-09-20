@@ -7,6 +7,7 @@ from turtle import st
 from fastapi import FastAPI, Depends, HTTPException, status, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
+from utils import validate_index_pattern
 from models.database import Index
 from models import response
 from models import request
@@ -99,7 +100,7 @@ def get_current_user(current_user: request.User = Depends(authHelper.get_current
 def index(payload: request.LogPayload, current_user: request.User = Depends(authHelper.get_current_user)):
 
     print(payload.payload)
-    index: Index = logHelper.create_if_not_exists(
+    logHelper.create_if_not_exists(
         payload.index, current_user.id)
 
     fields_unpacked = logHelper.ingest_log(
@@ -110,34 +111,18 @@ def index(payload: request.LogPayload, current_user: request.User = Depends(auth
 
 @app.get("/index/{index}")
 def get_logs(index: str, current_user: request.User = Depends(authHelper.get_current_user)):
-    return logHelper.retrieve_index(index)
+    res = logHelper.retrieve_index(index)
+
+    if not res:
+
+        return "No logs exist under this index yet! Hit /ingest to fix that!"
+
+    return res
 
 
 @app.get("/index/")
 def get_logs(current_user: request.User = Depends(authHelper.get_current_user)):
     return logHelper.retrieve_all_indexes()
-
-
-def validate_index_pattern(index_pattern: str):
-
-    error: HTTPException = None
-
-    if '*' not in index_pattern:
-        error = HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                              detail="Index Pattern must contain asterisk")
-
-    if index_pattern.count('*') == 1 and not (index_pattern.startswith('*') or index_pattern.endswith('*')):
-        error = HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                              detail="If two wildcards are supplied, they must be at the start and end.")
-
-    if index_pattern.count('*') == 2 and not (index_pattern.startswith('*') and index_pattern.endswith('*')):
-        error = HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                              detail="If two wildcards are supplied, they must be at the start and end.")
-    if index_pattern.count('*') > 2:
-        error = HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                              detail="Index Pattern must contain no more than two asterisk")
-
-    return index_pattern.replace('*', '%'), error
 
 
 @app.post("/search/")
@@ -148,7 +133,8 @@ def get_logs(request: request.IndexPatternPayload, current_user: request.User = 
     print(search_term)
 
     if error:
-        return error
+        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                             detail=error)
 
     return logHelper.retrieve_index_by_pattern(search_term)
 

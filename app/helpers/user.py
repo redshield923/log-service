@@ -21,9 +21,11 @@ class UserHelper:
 
         try:
 
-            cur.execute(create_new_users_sql,
-                        (username, password, updated_by, type,))
+            res = cur.execute(create_new_users_sql,
+                              (username, password, updated_by, type,))
+
             con.commit()
+            print(res.rowcount)
         except Exception as e:
             print(e)
             return False

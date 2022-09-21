@@ -5,13 +5,20 @@ This service will enable applications to post logs over HTTPs and provides basic
 The basic functionality is:
 
 - Logs posted in to the service and stored in a database.
-- Ability to view all logs, given a service name or id, including filtering
-- Associate log line(s) to a ticket, where the endpoint of the ticket system is provided
-- Delete logs (admin users only)
+- Ability to view all logs, given an index name, including searching over multiple indexes
+- Delete logs (Admin users only)
+- Create, Update and Delete Users (Admin only)
 
 # Running the application
 
 A number of ways to run the application are provided.
+
+Note: The following browsers are supported to run:
+- Edge
+- Chrome
+- Firefox
+
+Safari does not work!
 
 ## Prerequisites
 

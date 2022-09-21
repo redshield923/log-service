@@ -13,10 +13,10 @@ class UserHelper:
         # pylint: disable=C0103
         self.databaseHelper = database_helper
 
-    def create_new_users(self, username: str, password: str, updated_by: int, user_type: int):
+    def create_new_user(self, username: str, password: str, updated_by: int, user_type: int):
         con, cur = self.databaseHelper.get_database_connection()
 
-        create_new_users_sql = """
+        create_new_user_sql = """
             INSERT INTO user
             (username, password, active, time_created,
              time_updated, updated_by, type)
@@ -25,7 +25,7 @@ class UserHelper:
 
         try:
 
-            res = cur.execute(create_new_users_sql,
+            res = cur.execute(create_new_user_sql,
                               (username, password, updated_by, user_type,))
 
             con.commit()

@@ -172,7 +172,8 @@ def delete_index(index_name: str, current_user: request.User = Depends(authHelpe
 # User actions
 
 @app.post("/user")
-def create_user(req: request.NewUser, current_user: request.User = Depends(authHelper.get_current_user)):
+def create_user(req: request.NewUser, current_user:
+                request.User = Depends(authHelper.get_current_user)):
 
     # Only admins can create new users.
     if current_user.type == 1:
@@ -180,7 +181,7 @@ def create_user(req: request.NewUser, current_user: request.User = Depends(authH
                              detail="Not authorized to perform this action.")
 
     password_sha256 = authHelper.hash_password(req.user_password)
-    success = userHelper.create_new_users(
+    success = userHelper.create_new_user(
         req.username, password_sha256, current_user.id, req.type)
 
     if success:

@@ -106,7 +106,7 @@ class TestUser:
 
         # Insert new user with method to test
 
-        userHelper.create_new_users('newuser', 'passwordhash', 1, 1)
+        userHelper.create_new_user('newuser', 'passwordhash', 1, 1)
 
         # Grab our newly created user
         user = authHelper.get_user('newuser')
@@ -117,7 +117,7 @@ class TestUser:
 
         # Insert new user with method to test
 
-        assert userHelper.create_new_users(
+        assert userHelper.create_new_user(
             'newuser', 'passwordhash', 7, 7) == False
 
     # User::update_password
@@ -137,7 +137,7 @@ class TestUser:
     # User::delete_user
 
     def test_delete_user(self):
-        userHelper.create_new_users('newuser', 'passwordhash', 1, 1)
+        userHelper.create_new_user('newuser', 'passwordhash', 1, 1)
 
         userHelper.delete_user('newuser')
 

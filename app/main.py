@@ -1,3 +1,5 @@
+# pylint: disable=E0402,E0401,E0611,C0412
+
 import socket
 import sqlite3
 from hashlib import sha256
@@ -50,24 +52,23 @@ def health(current_user: User = Depends(authHelper.get_current_user)):
 
     hostname: str = socket.gethostname()
     res = {"db_health": True, "app_health": True, "hostname": hostname}
-    database_health = True
     print(f'connecting to database file ${Config.DATABASE_PATH}')
     con, cur = databaseHelper.get_database_connection()
 
     try:
         cur.execute('''create table test (test int)''')
+        con.commit()
         cur.execute('''insert into test values (1)''')
+        con.commit()
         cur.execute('''select * from test''')
         cur.execute('''drop table test''')
-    except sqlite3.Error:
+    except sqlite3.Error as err:
         con.commit()
         con.close()
+        print(err)
+        res['db_health'] = False
 
-        database_health = False
-
-    if database_health:
-        res["body"]["database_status"] = 500
-
+    con.close()
     return res
 
 
@@ -100,9 +101,8 @@ def get_current_user(current_user: request.User = Depends(authHelper.get_current
 
 
 @app.post('/ingest/')
-def ingest_index(payload: request.LogPayload, current_user: request.User = Depends(authHelper.get_current_user)):
+def ingest_log(payload: request.LogPayload, current_user: request.User = Depends(authHelper.get_current_user)):
 
-    print(payload.payload)
     logHelper.create_if_not_exists(
         payload.index, current_user.id)
 
@@ -128,7 +128,7 @@ def get_logs(index_name: str, current_user: request.User = Depends(authHelper.ge
 
 
 @app.get("/index/")
-def get_logs_from_index_name(current_user: request.User = Depends(authHelper.get_current_user)):
+def get_all_indexes(current_user: request.User = Depends(authHelper.get_current_user)):
 
     if not current_user:
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
@@ -149,7 +149,7 @@ def get_logs_from_pattern(req: request.IndexPatternPayload, current_user: reques
     if error:
         return HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                              detail=error)
-
+    print(logHelper.retrieve_index_by_pattern(search_term))
     return logHelper.retrieve_index_by_pattern(search_term)
 
 
@@ -199,7 +199,7 @@ def update_password(req: request.UpdatePassword, current_user: request.User = De
         return HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                              detail="Not authorized to perform this action.")
 
-    password_sha256 = authHelper.hash_password(req.user_password)
+    password_sha256 = authHelper.hash_password(req.password)
     success = userHelper.update_password(req.username, password_sha256)
 
     if success:

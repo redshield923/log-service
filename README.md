@@ -13,6 +13,13 @@ The basic functionality is:
 
 A number of ways to run the application are provided.
 
+## Prerequisites
+
+Some prerequisites are required to run the projet:
+- Python 3.8 or higher (https://www.python.org/downloads/)
+- Pytest (`python3 -m pip install pytest`)
+- Docker is optional but recommended. If not installed, see running locally. (https://docs.docker.com/get-docker/)
+  
 ## Docker
 
 It is recommended that the application is run with docker.

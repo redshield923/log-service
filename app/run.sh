@@ -16,7 +16,7 @@ BRed='\033[1;31m'         # Red
 
 echo -e "\n${Blue}Starting local build of ${Purple}log-service ${Blue}...${Reset}"
 
-pip install --no-cache-dir --upgrade -r requirements.txt
+python3 -m pip install --no-cache-dir --upgrade -r requirements.txt
 
 echo -e "\n${Green}Finished local build of ${Blue}log-service${Green}.${Reset}"
 echo -e "\n${Blue}Running tests...${Reset}"

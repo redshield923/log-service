@@ -16,7 +16,7 @@ BRed='\033[1;31m'         # Red
 
 echo -e "\n${Blue}Starting local build of ${Purple}log-service ${Blue}...${Reset}"
 
-pip install --no-cache-dir --upgrade -r requirements.txt
+pytho3 -m pip install --no-cache-dir --upgrade -r requirements.txt
 
 echo -e "\n${Green}Finished local build of ${Blue}log-service${Green}.${Reset}"
 pipenv run uvicorn main:app --reload --port 8000

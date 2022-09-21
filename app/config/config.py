@@ -1,8 +1,19 @@
+import secrets
 import os
 
 
 class Config:
-    DATABASE_PATH = os.environ['LOGGING_DATABASE_PATH']
+    DATABASE_PATH: str
+
+    try:
+        DATABASE_PATH = os.environ['LOGGING_DATABASE_PATH']
+    except KeyError:
+        DATABASE_PATH = '/code/app/database/sqlite.db'
+
     ACCESS_TOKEN_EXPIRE_MINUTES = 60
     ALGORITHM = 'HS256'
-    SECRET = os.environ['LOGGING_SECRET']
+
+    try:
+        SECRET = os.environ['LOGGING_SECRET']
+    except KeyError:
+        SECRET = secrets.token_hex(32)

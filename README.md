@@ -8,36 +8,46 @@ The basic functionality is:
 - Ability to view all logs, given a service name or id, including filtering
 - Associate log line(s) to a ticket, where the endpoint of the ticket system is provided
 - Delete logs (admin users only)
-- 
-
-# Set up
-
-This application is written in python. To install all dependecies, run:
-
-```bash
-pip install -r requirements.txt 
-```
-
-Note: if running in a virtualenv, see instructions below
 
 # Running the application
 
-The application can be run with 
+A number of ways to run the application are provided.
+
+## Docker
+
+It is recommended that the application is run with docker.
+
+Run with the following script, which will test, build and run a docker container that can be accessed at the address outputted.
 
 ```bash
+cd app
 ./run.sh
 ```
 
-from /app. Note you may need to:
+Note you may need to:
 
 ```bash
-chmod +X ./run.sh
+chmod +X app/run.sh
 ```
 
 on first use.
 
+## Locally
 
-To run manually...
+The application can be run with 
+
+```bash
+cd app
+./run-local.sh
+```
+
+Note you may need to:
+
+```bash
+chmod +X app/run-local.sh
+```
+
+on first use. This script will automatically run tests.
 
 # Testing
 

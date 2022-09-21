@@ -19,13 +19,4 @@ echo -e "\n${Blue}Starting local build of ${Purple}log-service ${Blue}...${Reset
 pip install --no-cache-dir --upgrade -r requirements.txt
 
 echo -e "\n${Green}Finished local build of ${Blue}log-service${Green}.${Reset}"
-echo -e "\n${Blue}Running tests...${Reset}"
-source ./test.sh
-echo -e "\n${Green}Tests finished. See above for results.${Reset}"
-
-echo -e "\n${Blue}Starting docker build of ${Purple}log-service${Blue}...${Reset}"
-docker build -f Dockerfile -t log-service:0.0.1 .
-docker tag log-service:0.0.1 log-service:latest 
-docker run --rm -d --name log-service -p 80:80 log-service:latest
-
-echo -e "\n${Blue}log-service${Green} running! Check out ${BRed}http://0.0.0.0/docs ${Green} to get started.${Reset}"
+pipenv run uvicorn main:app --reload --port 8000

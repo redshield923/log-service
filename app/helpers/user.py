@@ -1,15 +1,19 @@
+# pylint: disable=E0402,E0401,E0611
+
+import sqlite3
 from .database import DatabaseHelper
-from models.database import User
 
 
 class UserHelper:
 
     databaseHelper: DatabaseHelper
 
-    def __init__(self, databaseHelper: DatabaseHelper):
-        self.databaseHelper = databaseHelper
+    def __init__(self, database_helper: DatabaseHelper):
 
-    def create_new_users(self, username: str, password: str, updated_by: int, type: int):
+        # pylint: disable=C0103
+        self.databaseHelper = database_helper
+
+    def create_new_users(self, username: str, password: str, updated_by: int, user_type: int):
         con, cur = self.databaseHelper.get_database_connection()
 
         create_new_users_sql = """
@@ -22,16 +26,16 @@ class UserHelper:
         try:
 
             res = cur.execute(create_new_users_sql,
-                              (username, password, updated_by, type,))
+                              (username, password, updated_by, user_type,))
 
             con.commit()
             print(res.rowcount)
-        except Exception as e:
-            print(e)
+        except sqlite3.Error as err:
+            print(err)
+            con.close()
             return False
 
         con.close()
-
         return True
 
     def update_password(self, username: str, password: str):
@@ -47,12 +51,12 @@ class UserHelper:
             cur.execute(update_user_password_sql,
                         (password, username,))
             con.commit()
-        except Exception as e:
-            print(e)
+        except sqlite3.Error as err:
+            print(err)
+            con.close()
             return False
 
         con.close()
-
         return True
 
     def delete_user(self, username: str):
@@ -68,10 +72,10 @@ class UserHelper:
             cur.execute(delete_user_password_sql,
                         (username,))
             con.commit()
-        except Exception as e:
-            print(e)
+        except sqlite3.Error as err:
+            print(err)
+            con.close()
             return False
 
         con.close()
-
         return True

@@ -3,4 +3,4 @@ from pydantic import BaseModel
 
 
 class TokenData(BaseModel):
-    username: Union[str, None] = None 
+    username: Union[str, None] = None

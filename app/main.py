@@ -1,14 +1,11 @@
-from hashlib import sha256
-import re
 import socket
 import sqlite3
+from hashlib import sha256
 from datetime import timedelta
-from turtle import st
 from fastapi import FastAPI, Depends, HTTPException, status, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from utils import validate_index_pattern
-from models.database import Index
 from models import response
 from models import request
 from models.database import User
@@ -17,7 +14,6 @@ from helpers.database import DatabaseHelper
 from helpers.log import LogHelper
 from helpers.user import UserHelper
 from config.config import Config
-
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -42,12 +38,16 @@ userHelper = UserHelper(databaseHelper)
 
 
 @app.get('/')
-def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+def index(req: Request):
+    return templates.TemplateResponse("index.html", {"request": req})
 
 
 @app.get('/health', response_model=response.Health)
 def health(current_user: User = Depends(authHelper.get_current_user)):
+
+    if not current_user:
+        return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+
     hostname: str = socket.gethostname()
     res = {"db_health": True, "app_health": True, "hostname": hostname}
     database_health = True
@@ -65,30 +65,33 @@ def health(current_user: User = Depends(authHelper.get_current_user)):
 
         database_health = False
 
-    if (database_health):
+    if database_health:
         res["body"]["database_status"] = 500
 
     return res
 
 
 @app.post('/token', status_code=200)
-def token(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
+def token(login_data: Response, form_data: OAuth2PasswordRequestForm = Depends()):
     print(form_data)
     user: User = authHelper.authenticate_user(
         form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=401, detail="Incorrect Username or Password")
+    else:
+        access_token_expires = timedelta(
+            minutes=Config.ACCESS_TOKEN_EXPIRE_MINUTES)
 
-    access_token_expires = timedelta(
-        minutes=Config.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = authHelper.create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
-    )
-    response.status_code = status.HTTP_200_OK
-    response.set_cookie('LOGGING_SERVICE_TOKEN', access_token,
-                        httponly=True, secure=True, samesite='none')
-    return {"access_token": access_token, "token_type": "bearer", 'access_token_expires': access_token_expires}
+        # pylint: disable=E1101
+        access_token = authHelper.create_access_token(
+            data={"sub": user.username}, expires_delta=access_token_expires
+        )
+        login_data.status_code = status.HTTP_200_OK
+        login_data.set_cookie('LOGGING_SERVICE_TOKEN', access_token,
+                              httponly=True, secure=True, samesite='none')
+        return {"access_token": access_token, "token_type": "bearer",
+                'access_token_expires': access_token_expires}
 
 
 @app.get('/user/me')
@@ -97,7 +100,7 @@ def get_current_user(current_user: request.User = Depends(authHelper.get_current
 
 
 @app.post('/ingest/')
-def index(payload: request.LogPayload, current_user: request.User = Depends(authHelper.get_current_user)):
+def ingest_index(payload: request.LogPayload, current_user: request.User = Depends(authHelper.get_current_user)):
 
     print(payload.payload)
     logHelper.create_if_not_exists(
@@ -110,8 +113,12 @@ def index(payload: request.LogPayload, current_user: request.User = Depends(auth
 
 
 @app.get("/index/{index}")
-def get_logs(index: str, current_user: request.User = Depends(authHelper.get_current_user)):
-    res = logHelper.retrieve_index(index)
+def get_logs(index_name: str, current_user: request.User = Depends(authHelper.get_current_user)):
+
+    if not current_user:
+        return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+
+    res = logHelper.retrieve_index(index_name)
 
     if not res:
 
@@ -121,14 +128,21 @@ def get_logs(index: str, current_user: request.User = Depends(authHelper.get_cur
 
 
 @app.get("/index/")
-def get_logs(current_user: request.User = Depends(authHelper.get_current_user)):
+def get_logs_from_index_name(current_user: request.User = Depends(authHelper.get_current_user)):
+
+    if not current_user:
+        return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+
     return logHelper.retrieve_all_indexes()
 
 
 @app.post("/search/")
-def get_logs(request: request.IndexPatternPayload, current_user: request.User = Depends(authHelper.get_current_user)):
+def get_logs_from_pattern(req: request.IndexPatternPayload, current_user: request.User = Depends(authHelper.get_current_user)):
 
-    search_term, error = validate_index_pattern(request.index_pattern)
+    if not current_user:
+        return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+
+    search_term, error = validate_index_pattern(req.index_pattern)
 
     print(search_term)
 
@@ -140,16 +154,17 @@ def get_logs(request: request.IndexPatternPayload, current_user: request.User = 
 
 
 @app.delete("/index/{index}")
-def delete_index(index: str, current_user: request.User = Depends(authHelper.get_current_user)):
+def delete_index(index_name: str, current_user: request.User = Depends(authHelper.get_current_user)):
 
     # Only admins can delete indexes.
     if current_user.type == 1:
-        return HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform this action.")
+        return HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                             detail="Not authorized to perform this action.")
 
-    if not logHelper.index_if_exist(index=index):
+    if not logHelper.get_index(index_name):
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Index not found.")
 
-    logHelper.delete_index(index)
+    logHelper.delete_index(index_name)
 
     return status.HTTP_204_NO_CONTENT
 
@@ -157,35 +172,40 @@ def delete_index(index: str, current_user: request.User = Depends(authHelper.get
 # User actions
 
 @app.post("/user")
-def create_user(request: request.NewUser, current_user: request.User = Depends(authHelper.get_current_user)):
+def create_user(req: request.NewUser, current_user: request.User = Depends(authHelper.get_current_user)):
 
     # Only admins can create new users.
     if current_user.type == 1:
-        return HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform this action.")
+        return HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                             detail="Not authorized to perform this action.")
 
+    password_sha256 = authHelper.hash_password(req.user_password)
     success = userHelper.create_new_users(
-        request.username, sha256(request.user_password.encode('utf-8')).hexdigest(), current_user.id, request.type)
+        req.username, password_sha256, current_user.id, req.type)
 
     if success:
         return {"success": True}
 
-    return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="An error occured whilst creating a new user. This username may already exist.")
+    return HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                         detail="An error occured whilst creating a new user.")
 
 
 @app.put('/password')
-def update_password(request: request.UpdatePassword, current_user: request.User = Depends(authHelper.get_current_user)):
+def update_password(req: request.UpdatePassword, current_user: request.User = Depends(authHelper.get_current_user)):
 
     # Only admins can reset passwords.
     if current_user.type == 1:
-        return HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform this action.")
+        return HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                             detail="Not authorized to perform this action.")
 
-    success = userHelper.update_password(
-        request.username, sha256(request.password.encode('utf-8')).hexdigest())
+    password_sha256 = authHelper.hash_password(req.user_password)
+    success = userHelper.update_password(req.username, password_sha256)
 
     if success:
         return {"success": True}
 
-    return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="An error occured whilst updating user password. This username may already exist.")
+    return HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                         detail="An error occured whilst updating user password.")
 
 
 @app.delete('/user/{username}')
@@ -193,7 +213,8 @@ def delete_user(username: str, current_user: request.User = Depends(authHelper.g
 
     # Only admins can delete users.
     if current_user.type == 1:
-        return HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform this action.")
+        return HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                             detail="Not authorized to perform this action.")
 
     success = userHelper.delete_user(
         username)
@@ -201,4 +222,5 @@ def delete_user(username: str, current_user: request.User = Depends(authHelper.g
     if success:
         return {"success": True}
 
-    return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="An error occured whilst updating user password. This username may already exist.")
+    return HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                         detail="An error occured whilst deleting user.")

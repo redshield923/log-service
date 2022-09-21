@@ -1,23 +1,21 @@
-from calendar import c
-from signal import pause
+# pylint: disable=E0402,E0401,E0611
+
 import sqlite3
 from typing import List
-
-from .database import DatabaseHelper
 from models.database import Index, LogResult
+from .database import DatabaseHelper
 
 
 class LogHelper:
 
     databaseHelper: DatabaseHelper
 
-    def __init__(self, databaseHelper: DatabaseHelper):
-        self.databaseHelper = databaseHelper
+    def __init__(self, database_helper: DatabaseHelper):
+
+        # pylint: disable=C0103
+        self.databaseHelper = database_helper
 
     def ingest_log(self, index: str, source: str, payload):
-        # insert a log
-        # get§
-
         con, cur = self.databaseHelper.get_database_connection()
 
         create_new_log_sql = "INSERT INTO log (index_name, time_ingested, source) VALUES (?, julianday('now'), ?)"
@@ -68,10 +66,10 @@ class LogHelper:
 
         con, cur = self.databaseHelper.get_database_connection()
 
-        create_index_sql = "INSERT INTO log_index VALUES ( ?, julianday('now'), julianday('now'), ?)"
+        create_index_sql = """
+        INSERT INTO log_index VALUES ( ?, julianday('now'), julianday('now'), ?)"""
 
         try:
-
             cur.execute(create_index_sql, (index_name, user,))
 
         except sqlite3.IntegrityError as err:
@@ -105,6 +103,22 @@ class LogHelper:
 
         return False
 
+    def get_index(self, index_name: str):
+
+        con, cur = self.databaseHelper.get_database_connection()
+
+        find_index_sql = "SELECT * FROM log_index WHERE name = ?"
+
+        cur.execute(find_index_sql, (index_name,))
+        res: Index = cur.fetchone()
+        print()
+        print(res)
+        con.close()
+        if not res:
+            return False
+
+        return res
+
     def retrieve_index(self, index: str):
 
         get_logs_from_index_sql = """
@@ -134,12 +148,11 @@ class LogHelper:
 
             index_result.append(formatted_row)
 
-        print(index_result)
         return index_result
 
     def retrieve_index_by_pattern(self, search: str, ):
 
-        get_logs_from_index_pattern_sql = f"""
+        get_logs_from_index_pattern_sql = """
         select i.name as index_name, f.name as field, f.payload as message, l.time_ingested as timestamp, l.source as source
         from field as f
         INNER JOIN log as l on f.log_id = l.id
@@ -172,9 +185,7 @@ class LogHelper:
 
         delete_fields_sql = """
             DELETE FROM field where log_id IN (
-                
                 SELECT id from log where index_name = ?
-                
             )
             """
 

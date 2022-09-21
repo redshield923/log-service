@@ -1,14 +1,15 @@
-import sys
+# pylint: disable=E0402,E0401,E0611
+
+
 from datetime import datetime, timedelta
 from hashlib import sha256
 from typing import Union
-from .database import DatabaseHelper
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from jose import jwt, JWTError
 from models.auth import TokenData
 from models.database import User
-from jose import jwt, JWTError
-from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-
+from .database import DatabaseHelper
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
@@ -18,11 +19,13 @@ class AuthHelper:
     algorithm: str
     databaseHelper: DatabaseHelper
 
-    def __init__(self, secret: str, algorithm: str, databaseHelper: DatabaseHelper):
+    def __init__(self, secret: str, algorithm: str, database_helper: DatabaseHelper):
 
         self.secret = secret
         self.algorithm = algorithm
-        self.databaseHelper = databaseHelper
+
+        # pylint: disable=C0103
+        self.databaseHelper = database_helper
 
     def get_user(self, username: str):
         find_user_sql = "SELECT * FROM user WHERE username = ?"
@@ -81,4 +84,7 @@ class AuthHelper:
 
     def correct_password(self, password_hash: str, password: str):
 
-        return True if password_hash == sha256(password.encode('utf-8')).hexdigest() else False
+        return True if password_hash == self.hash_password(password) else False
+
+    def hash_password(self, password: str):
+        return sha256(password.encode('utf-8')).hexdigest()

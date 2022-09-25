@@ -27,6 +27,7 @@ Some prerequisites are required to run the projet:
 - Pytest (`python3 -m pip install pytest`)
 - Docker is optional but recommended. If not installed, see running locally. (https://docs.docker.com/get-docker/)
   
+ 
 ## Docker
 
 It is recommended that the application is run with docker.
@@ -62,6 +63,14 @@ chmod +X app/run-local.sh
 ```
 
 on first use. This script will automatically run tests.
+
+# Login Details
+
+To use the application, two user profiles are provided:
+- user
+- admin
+
+They both have the password 'password'.
 
 # Testing
 

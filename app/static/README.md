@@ -1,0 +1,1 @@
+This empty directory is needed for django to bundle static assests. Please do not remove.

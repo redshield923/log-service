@@ -137,6 +137,8 @@ def get_all_indexes(current_user: request.User = Depends(authHelper.get_current_
     if not results:
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No indexes found")
 
+    return results
+
 
 @app.post("/search/")
 def get_logs_from_pattern(req: request.IndexPatternPayload, current_user: request.User = Depends(authHelper.get_current_user)):
@@ -154,6 +156,8 @@ def get_logs_from_pattern(req: request.IndexPatternPayload, current_user: reques
     results = logHelper.retrieve_index_by_pattern(search_term)
     if not results:
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No indexes found")
+
+    return results
 
 
 @app.delete("/index/{index}")

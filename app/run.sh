@@ -18,8 +18,7 @@ echo -e "\n${Blue}Starting local build of ${Purple}log-service ${Blue}...${Reset
 
 python3 -m pip install --no-cache-dir --upgrade -r requirements.txt
 
-if [ $? -eq 0 ]; then
-else
+if [ !$? -eq 0 ]; then
     echo "${Red}Pip install failed. Do you have Python3 installed?${Reset}"
     exit 1
 fi
@@ -34,8 +33,7 @@ docker build -f Dockerfile -t log-service:0.0.1 .
 docker tag log-service:0.0.1 log-service:latest 
 docker run --rm -d --name log-service -p 80:80 log-service:latest
 
-if [ $? -eq 0 ]; then
-else
+if [ !$? -eq 0 ]; then
     echo "${Red}Failed to build or run Docker container. Is docker installed and running?${Reset}"
     exit 1
 fi

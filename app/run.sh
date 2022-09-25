@@ -17,7 +17,7 @@ BRed='\033[1;31m'         # Red
 echo -e "\n${Blue}Starting local build of ${Purple}log-service ${Blue}...${Reset}"
 python3 -m pip install --no-cache-dir --upgrade -r requirements.txt 
 
-if [ !$? -eq 0 ]; then
+if [ $? -nq 0 ]; then
     echo "${Red}Pip install failed. Do you have Python3 installed?${Reset}"
     exit 1
 fi

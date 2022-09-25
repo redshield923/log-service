@@ -17,6 +17,10 @@ BRed='\033[1;31m'         # Red
 echo -e "\n${Blue}Setting up local test environment...${Reset}"
 
 python3 -m pip install pytest
+if [ !$? -eq 0 ]; then
+    echo "${Red}Pip install failed. Do you have Python3 installed?${Reset}"
+    exit 1
+fi
 
 TEST_DB_PATH="$(pwd)/database/test.db"
 if [ -f $TEST_DB_PATH ] ; then

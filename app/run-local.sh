@@ -16,7 +16,10 @@ BRed='\033[1;31m'         # Red
 
 echo -e "\n${Blue}Starting local build of ${Purple}log-service ${Blue}...${Reset}"
 
-pytho3 -m pip install --no-cache-dir --upgrade -r requirements.txt
-
+python3 -m pip install --no-cache-dir --upgrade -r requirements.txt pytest
+if [ !$? -eq 0 ]; then
+    echo "${Red}Pip install failed. Do you have Python3 installed?${Reset}"
+    exit 1
+fi
 echo -e "\n${Green}Finished local build of ${Blue}log-service${Green}.${Reset}"
 pipenv run uvicorn main:app --reload --port 8000

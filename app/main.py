@@ -122,7 +122,7 @@ def get_logs(index_name: str, current_user: request.User = Depends(authHelper.ge
 
     if not res:
 
-        return "No logs exist under this index yet! Hit /ingest to fix that!"
+        return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No logs exist under this index yet! Hit /ingest to fix that!")
 
     return res
 
@@ -133,7 +133,9 @@ def get_all_indexes(current_user: request.User = Depends(authHelper.get_current_
     if not current_user:
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
-    return logHelper.retrieve_all_indexes()
+    results = logHelper.retrieve_all_indexes()
+    if not results:
+        return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No indexes found")
 
 
 @app.post("/search/")
@@ -149,8 +151,9 @@ def get_logs_from_pattern(req: request.IndexPatternPayload, current_user: reques
     if error:
         return HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                              detail=error)
-    print(logHelper.retrieve_index_by_pattern(search_term))
-    return logHelper.retrieve_index_by_pattern(search_term)
+    results = logHelper.retrieve_index_by_pattern(search_term)
+    if not results:
+        return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No indexes found")
 
 
 @app.delete("/index/{index}")

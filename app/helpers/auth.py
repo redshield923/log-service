@@ -1,6 +1,7 @@
 # pylint: disable=E0402,E0401,E0611,C0412,C0116,C0114,C0115
 
-from argon2 import PasswordHasher, VerificationError
+from argon2 import PasswordHasher
+from argon2.exceptions import VerificationError
 from datetime import datetime, timedelta
 from hashlib import sha256
 from typing import Union
@@ -85,7 +86,7 @@ class AuthHelper:
     def correct_password(self, password_hash: str, password: str):
         password_hasher = PasswordHasher()
         try:
-            password_hasher.verify(password_hash, self.hash_password(password))
+            password_hasher.verify(password_hash, password)
         except VerificationError:
             return False
 
@@ -93,4 +94,4 @@ class AuthHelper:
 
     def hash_password(self, password: str):
         password_hasher = PasswordHasher()
-        return password_hasher.hash(password)
+        return password_hasher.hash(password.encode('utf-8'))

@@ -1,16 +1,17 @@
 # pylint: disable=E0402,E0401,E0611,C0412,C0116,C0114,C0115
 
-from argon2 import PasswordHasher
-from argon2.exceptions import VerificationError
+
 from datetime import datetime, timedelta
-from hashlib import sha256
 from typing import Union
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
+from argon2 import PasswordHasher
+from argon2.exceptions import VerificationError
 from models.auth import TokenData
 from models.database import User
 from .database import DatabaseHelper
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 

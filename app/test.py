@@ -11,7 +11,6 @@ from config.config import Config
 from helpers.auth import AuthHelper
 from models import request
 from utils import validate_index_pattern
-from argon2 import PasswordHasher
 
 
 databaseHelper = DatabaseHelper(Config.DATABASE_PATH)
@@ -54,6 +53,7 @@ class TestAuth:
     def test_correct_password_valid(self):
 
         # SHA256 hash of 'password'
+        # pylint: disable=line-too-long
         password_hash = '$argon2id$v=19$m=65536,t=3,p=4$oD9N538qSVeOHP9B43Q/hA$y5mUdo2M1QeYYk+qXqm7iZmwDjCCbmUIhZ1XBV3p0O4'
         assert authHelper.correct_password(password_hash, 'password') is True
 

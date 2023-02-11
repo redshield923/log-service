@@ -2,45 +2,47 @@ module.exports = {
 
     types: [
       {
-        value: 'WIP',
+        value: '💪 WIP',
         name : '💪  WIP:      Work in progress'
       },
       {
-        value: 'feat',
+        value: '✨ feat',
         name : '✨  feat:     A new feature'
       },
       {
-        value: 'fix',
+        value: '🐞 fix',
         name : '🐞  fix:      A bug fix'
       },
       {
-        value: 'refactor',
+        value: '🛠 refactor',
         name : '🛠  refactor: A code change that neither fixes a bug nor adds a feature'
       },
       {
-        value: 'docs',
+        value: '💚 ci',
+        name : '⏪  ci:   Add or update to CICD pipeline'
+      },
+      {
+        value: '📚 docs',
         name : '📚  docs:     Documentation only changes'
       },
       {
-        value: 'test',
+        value: '🏁 test',
         name : '🏁  test:     Add missing tests or correcting existing tests'
       },
       {
-        value: 'chore',
+        value: '🗯 chore',
         name : '🗯  chore:    Changes that don\'t modify src or test files. Such as updating build tasks, package manager'
       },
       {
-        value: 'style',
+        value: '💅 style',
         name : '💅  style:    Code Style, Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)'
       },
       {
-        value: 'revert',
+        value: '⏪ revert',
         name : '⏪  revert:   Revert to a commit'
       }
     ],
   
-    scopes: [],
-  
-    allowCustomScopes: true,
-    allowBreakingChanges: ["feat", "fix"]
+    scopes: [{ name: "ui"}, {name: "backend"}, {name: "cicd"}, {name: "general"}],
+    allowCustomScopes: true
   };

@@ -1,5 +1,4 @@
-# pylint: disable=E0402,E0401,E0611
-
+# pylint: disable=E0402,E0401,E0611,C0412,C0116,C0114,C0115
 
 from datetime import datetime, timedelta
 from hashlib import sha256
@@ -75,8 +74,8 @@ class AuthHelper:
             if username is None:
                 raise credentials_exception
             token_data = TokenData(username=username)
-        except JWTError:
-            raise credentials_exception
+        except JWTError as exc:
+            raise credentials_exception from exc
         user = self.get_user(username=token_data.username)
         if user is None:
             raise credentials_exception
@@ -84,7 +83,7 @@ class AuthHelper:
 
     def correct_password(self, password_hash: str, password: str):
 
-        return True if password_hash == self.hash_password(password) else False
+        return bool(password_hash == self.hash_password(password))
 
     def hash_password(self, password: str):
         return sha256(password.encode('utf-8')).hexdigest()

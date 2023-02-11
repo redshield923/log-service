@@ -1,6 +1,8 @@
 # pylint: disable=E0402,E0401,E0611,C0412,C0116,C0114,C0115
 
 import sqlite3
+import pytest
+import main
 from models.database import User
 from helpers.database import DatabaseHelper
 from helpers.log import LogHelper
@@ -9,8 +11,7 @@ from config.config import Config
 from helpers.auth import AuthHelper
 from models import request
 from utils import validate_index_pattern
-import main
-import pytest
+
 
 databaseHelper = DatabaseHelper(Config.DATABASE_PATH)
 authHelper = AuthHelper(Config.SECRET, Config.ALGORITHM, databaseHelper)

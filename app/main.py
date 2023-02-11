@@ -1,12 +1,13 @@
-# pylint: disable=E0402,E0401,E0611,C0412
+# pylint: disable=E0402,E0401,E0611,C0412,C0116,C0114,C0115
 
 import socket
 import sqlite3
-from hashlib import sha256
 from datetime import timedelta
 from fastapi import FastAPI, Depends, HTTPException, status, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from utils import validate_index_pattern
 from models import response
 from models import request
@@ -16,9 +17,6 @@ from helpers.database import DatabaseHelper
 from helpers.log import LogHelper
 from helpers.user import UserHelper
 from config.config import Config
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-
 
 templates = Jinja2Templates(directory="templates")
 
@@ -80,19 +78,19 @@ def token(login_data: Response, form_data: OAuth2PasswordRequestForm = Depends()
     if not user:
         raise HTTPException(
             status_code=401, detail="Incorrect Username or Password")
-    else:
-        access_token_expires = timedelta(
-            minutes=Config.ACCESS_TOKEN_EXPIRE_MINUTES)
 
-        # pylint: disable=E1101
-        access_token = authHelper.create_access_token(
-            data={"sub": user.username}, expires_delta=access_token_expires
-        )
-        login_data.status_code = status.HTTP_200_OK
-        login_data.set_cookie('LOGGING_SERVICE_TOKEN', access_token,
-                              httponly=True, secure=True, samesite='none')
-        return {"access_token": access_token, "token_type": "bearer",
-                'access_token_expires': access_token_expires}
+    access_token_expires = timedelta(
+        minutes=Config.ACCESS_TOKEN_EXPIRE_MINUTES)
+
+    # pylint: disable=E1101
+    access_token = authHelper.create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    login_data.status_code = status.HTTP_200_OK
+    login_data.set_cookie('LOGGING_SERVICE_TOKEN', access_token,
+                          httponly=True, secure=True, samesite='none')
+    return {"access_token": access_token, "token_type": "bearer",
+            'access_token_expires': access_token_expires}
 
 
 @app.get('/user/me')
@@ -101,7 +99,8 @@ def get_current_user(current_user: request.User = Depends(authHelper.get_current
 
 
 @app.post('/ingest/')
-def ingest_log(payload: request.LogPayload, current_user: request.User = Depends(authHelper.get_current_user)):
+def ingest_log(payload: request.LogPayload,
+               current_user: request.User = Depends(authHelper.get_current_user)):
 
     logHelper.create_if_not_exists(
         payload.index, current_user.id)
@@ -122,7 +121,8 @@ def get_logs(index_name: str, current_user: request.User = Depends(authHelper.ge
 
     if not res:
 
-        return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No logs exist under this index yet! Hit /ingest to fix that!")
+        return HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                             detail="No logs exist under this index yet! Hit /ingest to fix that!")
 
     return res
 
@@ -141,7 +141,8 @@ def get_all_indexes(current_user: request.User = Depends(authHelper.get_current_
 
 
 @app.post("/search/")
-def get_logs_from_pattern(req: request.IndexPatternPayload, current_user: request.User = Depends(authHelper.get_current_user)):
+def get_logs_from_pattern(req: request.IndexPatternPayload,
+                          current_user: request.User = Depends(authHelper.get_current_user)):
 
     if not current_user:
         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
@@ -161,7 +162,8 @@ def get_logs_from_pattern(req: request.IndexPatternPayload, current_user: reques
 
 
 @app.delete("/index/{index}")
-def delete_index(index_name: str, current_user: request.User = Depends(authHelper.get_current_user)):
+def delete_index(index_name: str,
+                 current_user: request.User = Depends(authHelper.get_current_user)):
 
     # Only admins can delete indexes.
     if current_user.type == 1:
@@ -199,7 +201,8 @@ def create_user(req: request.NewUser, current_user:
 
 
 @app.put('/password')
-def update_password(req: request.UpdatePassword, current_user: request.User = Depends(authHelper.get_current_user)):
+def update_password(req: request.UpdatePassword,
+                    current_user: request.User = Depends(authHelper.get_current_user)):
 
     # Only admins can reset passwords.
     if current_user.type == 1:

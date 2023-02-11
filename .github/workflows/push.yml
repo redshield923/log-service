@@ -30,6 +30,7 @@ jobs:
           python3 -m pip install --no-cache-dir --upgrade -r requirements.txt
       - name: Set up Test env
         run: |
+          cd app
           source app/scripts/set-up-test-db.sh
       - name: Run Pytest
         run: |

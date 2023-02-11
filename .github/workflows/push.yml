@@ -31,7 +31,7 @@ jobs:
       - name: Set up Test env
         run: |
           cd app
-          source app/scripts/set-up-test-db.sh
+          source ./scripts/set-up-test-db.sh
       - name: Run Pytest
         run: |
           cd app

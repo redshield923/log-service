@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -59,6 +59,17 @@ jobs:
         run: |
           cd app
           LOGGING_DATABASE_PATH=database/test.db LOGGING_SECRET=$(openssl rand -hex 32) pytest "$(pwd)/test.py"
+      - name: Build Docker container
+        run: |
+          cd app
+          docker build -f Dockerfile -t log-service:0.0.1 .
+          docker tag log-service:0.0.1 log-service:latest
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
       - name: Build Docker container
         run: |
           cd app

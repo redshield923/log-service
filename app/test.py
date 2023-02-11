@@ -3,6 +3,7 @@
 import sqlite3
 from fastapi import HTTPException
 from models.database import User
+from models.response import Health
 from helpers.database import DatabaseHelper
 from helpers.log import LogHelper
 from helpers.user import UserHelper
@@ -323,8 +324,9 @@ class TestMain():
 
     def test_health(self):
 
-        assert main.health() == {'app_health': True,
-                                 'db_health': True, 'hostname': 'Benjamins-MBP'}
+        health_res = main.health()
+
+        assert health_res['db_health'] and health_res['app_health']
 
     def test_ingest_logs(self):
 

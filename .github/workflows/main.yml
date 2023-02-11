@@ -1,4 +1,4 @@
-name: Python application
+name: Pushes to Main
 
 on:
   push:

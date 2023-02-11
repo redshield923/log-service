@@ -1,0 +1,14 @@
+{
+  "name": "log-service",
+  "version": "1.0.0",
+  "description": "This service will enable applications to post logs over HTTPs and provides basic visualisation of those logs in a tabulated form.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "husky": "^8.0.3"
+  }
+}

@@ -35,12 +35,14 @@ sqlite3 "$TEST_DB_PATH" < "$(pwd)/database/scripts/create_database_tables.sql"
 
 echo -e "\n${Green}Created tables. Inserting test data...${Reset}"
 
+PASSWORD_HASH='$argon2id$v=19$m=65536,t=3,p=4$lGQxm45YoJiMzopOT61bkA$tYVNFK/TJ0Mm7qFEeSAnGXCEM9Q7gRl/yE+pfN9JoQk'
+
 sqlite3 "$TEST_DB_PATH" "INSERT INTO ref_usertype (type) VALUES ('user')"
 sqlite3 "$TEST_DB_PATH" "INSERT INTO ref_usertype (type) VALUES ('user')"
 sqlite3 "$TEST_DB_PATH" "INSERT INTO ref_usertype (type) VALUES ('admin')"
 sqlite3 "$TEST_DB_PATH" "INSERT INTO ref_usertype (type) VALUES ('superadmin')"
-sqlite3 "$TEST_DB_PATH" "INSERT INTO user (id, username, password, active, time_created, time_updated, updated_by, type) VALUES (1,'testadmin', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 1, julianday('now'), julianday('now'), 1, 2)"
-sqlite3 "$TEST_DB_PATH" "INSERT INTO user (id, username, password, active, time_created, time_updated, updated_by, type) VALUES (2,'testuser', '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 1, julianday('now'), julianday('now'), 1, 1)"
+sqlite3 "$TEST_DB_PATH" "INSERT INTO user (id, username, password, active, time_created, time_updated, updated_by, type) VALUES (1,'testadmin', '$PASSWORD_HASH', 1, julianday('now'), julianday('now'), 1, 2)"
+sqlite3 "$TEST_DB_PATH" "INSERT INTO user (id, username, password, active, time_created, time_updated, updated_by, type) VALUES (2,'testuser', '$PASSWORD_HASH', 1, julianday('now'), julianday('now'), 1, 1)"
 
 echo -e "\n${Green}Successfully inserted test data. Running test with pytest...${Reset}"
 

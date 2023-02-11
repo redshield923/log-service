@@ -4,11 +4,19 @@
   "description": "This service will enable applications to post logs over HTTPs and provides basic visualisation of those logs in a tabulated form.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky install"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "commitizen": "^4.3.0",
+    "cz-customizable": "^7.0.0",
     "husky": "^8.0.3"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-customizable"
+    }
   }
 }

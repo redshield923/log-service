@@ -1,9 +1,7 @@
-# pylint: disable=E0402,E0401,E0611,C0412
+# pylint: disable=E0402,E0401,E0611,C0412,C0116,C0114,C0115
 
 import sqlite3
-from fastapi import HTTPException
 from models.database import User
-from models.response import Health
 from helpers.database import DatabaseHelper
 from helpers.log import LogHelper
 from helpers.user import UserHelper
@@ -174,7 +172,7 @@ class TestLog:
     # Log::create_index and retrieve_all_indexes
 
     def test_create_index_valid(self):
-        res = logHelper.create_index('testindex', 1)
+        logHelper.create_index('testindex', 1)
         index = logHelper.retrieve_all_indexes()
         print(index)
         assert index[0]['name'] == 'testindex'
@@ -198,8 +196,10 @@ class TestLog:
         for k in res:
             del k['timestamp']
 
-        assert res == [{'index_name': 'testindex', 'field': 'time', 'message': '2022-10-08', 'source': 'testsource'}, {
-            'index_name': 'testindex', 'field': 'message', 'message': 'This is a test message!', 'source': 'testsource'}]
+        assert res == [{'index_name': 'testindex', 'field': 'time',
+                        'message': '2022-10-08', 'source': 'testsource'},
+                       {'index_name': 'testindex', 'field': 'message',
+                        'message': 'This is a test message!', 'source': 'testsource'}]
 
     def test_retrieve_index_not_existing(self):
 
@@ -305,22 +305,35 @@ class TestUtils:
 
         index_pattern, err = validate_index_pattern("t*e*st")
 
+        # pylint: disable=line-too-long
         assert err == "If two wildcards are supplied, they must be at the start and end." and index_pattern == "t%e%st"
 
     def test_validate_index_pattern_invalid_three_in_middle(self):
 
         index_pattern, err = validate_index_pattern("te*s*t*")
-
+        # pylint: disable=line-too-long
         assert err == "Index Pattern must contain no more than two asterisk" and index_pattern == "te%s%t%"
 
 
 class TestMain():
 
     test_user = User(
-        username="testuser", id=1, password="ee", time_created="00", time_updated="00", updated_by=1, type=1)
+        username="testuser",
+        id=1,
+        password="ee",
+        time_created="00",
+        time_updated="00",
+        updated_by=1,
+        type=1)
 
     test_admin = User(
-        username="testadmin", id=1, password="ee", time_created="00", time_updated="00", updated_by=1, type=3)
+        username="testadmin",
+        id=1,
+        password="ee",
+        time_created="00",
+        time_updated="00",
+        updated_by=1,
+        type=3)
 
     def test_health(self):
 
@@ -352,8 +365,10 @@ class TestMain():
         for k in res:
             del k['timestamp']
 
-        assert res == [{'field': 'time', 'index_name': 'testindex', 'message': '123124124', 'source': 'testsource'}, {
-            'field': 'message', 'index_name': 'testindex', 'message': 'a test message', 'source': 'testsource'}]
+        assert res == [{'field': 'time', 'index_name': 'testindex',
+                        'message': '123124124', 'source': 'testsource'},
+                       {'field': 'message', 'index_name': 'testindex',
+                        'message': 'a test message', 'source': 'testsource'}]
 
     def test_get_logs_from_name(self):
 
@@ -405,8 +420,14 @@ class TestMain():
         for k in res:
             del k['timestamp']
 
-        assert res == [{'index_name': 'testindex', 'field': 'time', 'message': '123124124', 'source': 'testsource'}, {'index_name': 'testindex', 'field': 'message', 'message': 'a test message', 'source': 'testsource'}, {
-            'index_name': 'testindex1', 'field': 'time', 'message': '123124124', 'source': 'testsource'}, {'index_name': 'testindex1', 'field': 'message', 'message': 'a test message', 'source': 'testsource'}]
+        assert res == [{'index_name': 'testindex', 'field': 'time',
+                        'message': '123124124', 'source': 'testsource'},
+                       {'index_name': 'testindex', 'field': 'message',
+                        'message': 'a test message', 'source': 'testsource'},
+                       {'index_name': 'testindex1', 'field': 'time',
+                        'message': '123124124', 'source': 'testsource'},
+                       {'index_name': 'testindex1', 'field': 'message',
+                        'message': 'a test message', 'source': 'testsource'}]
 
     def test_delete_index_not_authed(self):
 
@@ -441,14 +462,17 @@ class TestMain():
     def test_create_user(self):
 
         assert main.create_user(request.NewUser(
-            username="newuser", user_password="password", type=2), self.test_admin) == {"success": True}
+            username="newuser", user_password="password", type=2),
+            self.test_admin) == {"success": True}
 
     def test_create_user_already_exists(self):
 
         assert main.create_user(request.NewUser(
-            username="testuser", user_password="password", type=2), self.test_admin).status_code == 400
+            username="testuser", user_password="password", type=2),
+            self.test_admin).status_code == 400
 
     def test_create_user_not_authed(self):
 
         assert main.create_user(request.NewUser(
-            username="testuser", user_password="password", type=2), self.test_user).status_code == 403
+            username="testuser", user_password="password", type=2),
+            self.test_user).status_code == 403

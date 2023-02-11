@@ -1,4 +1,4 @@
-# pylint: disable=E0402,E0401,E0611
+# pylint: disable=E0402,E0401,E0611,C0412,C0116,C0114,C0115
 
 import sqlite3
 from typing import List
@@ -18,7 +18,8 @@ class LogHelper:
     def ingest_log(self, index: str, source: str, payload):
         con, cur = self.databaseHelper.get_database_connection()
 
-        create_new_log_sql = "INSERT INTO log (index_name, time_ingested, source) VALUES (?, julianday('now'), ?)"
+        create_new_log_sql = """INSERT INTO log (index_name, time_ingested, source)
+        VALUES (?, julianday('now'), ?)"""
         try:
 
             cur.execute(create_new_log_sql, (index, source))
@@ -32,9 +33,9 @@ class LogHelper:
 
         # Parse json and insert a field for each key/value pair
 
-        for k, v in payload.items():
+        for key, value in payload.items():
             create_new_field_sql = "INSERT INTO field (log_id, name, payload) VALUES (?, ?, ?)"
-            cur.execute(create_new_field_sql, (log_id, k, v))
+            cur.execute(create_new_field_sql, (log_id, key, value))
             con.commit()
 
         con.close()

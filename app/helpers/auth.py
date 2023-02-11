@@ -1,15 +1,17 @@
-# pylint: disable=E0402,E0401,E0611
+# pylint: disable=E0402,E0401,E0611,C0412,C0116,C0114,C0115
 
 
 from datetime import datetime, timedelta
-from hashlib import sha256
 from typing import Union
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
+from argon2 import PasswordHasher
+from argon2.exceptions import VerificationError
 from models.auth import TokenData
 from models.database import User
 from .database import DatabaseHelper
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
@@ -75,16 +77,22 @@ class AuthHelper:
             if username is None:
                 raise credentials_exception
             token_data = TokenData(username=username)
-        except JWTError:
-            raise credentials_exception
+        except JWTError as exc:
+            raise credentials_exception from exc
         user = self.get_user(username=token_data.username)
         if user is None:
             raise credentials_exception
         return user
 
     def correct_password(self, password_hash: str, password: str):
+        password_hasher = PasswordHasher()
+        try:
+            password_hasher.verify(password_hash, password)
+        except VerificationError:
+            return False
 
-        return True if password_hash == self.hash_password(password) else False
+        return True
 
     def hash_password(self, password: str):
-        return sha256(password.encode('utf-8')).hexdigest()
+        password_hasher = PasswordHasher()
+        return password_hasher.hash(password.encode('utf-8'))

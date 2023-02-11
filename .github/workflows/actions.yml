@@ -26,38 +26,13 @@ jobs:
         run: |
           cd app
           python -m pip install --upgrade pip
-          python3 -m pip install --no-cache-dir --upgrade -r requirements.txt
-      - name: Build Docker container
-        run: |
-          cd app
-          docker build -f Dockerfile -t log-service:0.0.1 .
-          docker tag log-service:0.0.1 log-service:latest
-
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v3
-        with:
-          python-version: "3.10"
-      - name: Install dependencies
-        run: |
-          cd app
-          python -m pip install --upgrade pip
+          python3 -m pip install pytest
+          sudo apt-get install sqlite3
           python3 -m pip install --no-cache-dir --upgrade -r requirements.txt
       - name: Set up Test env
         run: |
           cd app
-          sudo apt-get install sqlite3
           echo -e "\n${Blue}Setting up local test environment...${Reset}"
-
-          python3 -m pip install pytest
-          if [ ! $? -eq 0 ]; then
-              echo "${Red}Pip install failed. Do you have Python3 installed?${Reset}"
-              exit 1
-          fi  
 
           TEST_DB_PATH=database/test.db
           if [ -f "$TEST_DB_PATH" ] ; then
@@ -84,3 +59,8 @@ jobs:
         run: |
           cd app
           LOGGING_DATABASE_PATH=database/test.db LOGGING_SECRET=$(openssl rand -hex 32) pytest "$(pwd)/test.py"
+      - name: Build Docker container
+        run: |
+          cd app
+          docker build -f Dockerfile -t log-service:0.0.1 .
+          docker tag log-service:0.0.1 log-service:latest

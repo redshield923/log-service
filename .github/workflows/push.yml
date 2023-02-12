@@ -82,6 +82,8 @@ jobs:
       - uses: pyupio/safety@2.3.4
         with:
           api-key: ${{secrets.SAFETY_API_KEY}}
+          scan: "file"
+          requirements: "app/requirements.txt"
 
   lint:
     runs-on: ubuntu-latest

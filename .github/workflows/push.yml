@@ -76,6 +76,13 @@ jobs:
         with:
           category: "/language:${{matrix.language}}"
 
+  dependency-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: pyupio/safety@2.3.4
+        with:
+          api-key: ${{secrets.SAFETY_API_KEY}}
+
   lint:
     runs-on: ubuntu-latest
     strategy:

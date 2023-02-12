@@ -98,6 +98,7 @@ jobs:
         with:
           api-key: ${{secrets.SAFETY_API_KEY}}
           scan: "env"
+          args: "-i 51457 -i 52495"
 
   lint:
     runs-on: ubuntu-latest

@@ -144,6 +144,11 @@
           })
     
         const body = await res.json()
+
+        if(res.status != 200) {
+          alert("Not authorised");
+          await logIn();
+        }
     
         console.log(body)
     

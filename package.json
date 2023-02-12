@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "cd app && ./scripts/test.sh",
+    "virtualenv": "cd app && pipenv activate && pipenv shell",
     "start:docker": "cd app && ./scripts/run.sh",
     "start:local": "cd app && ./scripts/run-local.sh",
     "prepare": "husky install",

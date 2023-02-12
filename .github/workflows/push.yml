@@ -14,7 +14,7 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-
+    needs: dependency-scan
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.10
@@ -23,6 +23,8 @@ jobs:
           python-version: "3.10"
           cache: "pip"
       - name: Install dependencies
+        with:
+          cache: "pip"
         run: |
           cd app
           python -m pip install --upgrade pip
@@ -79,14 +81,19 @@ jobs:
   dependency-scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-      - uses: actions/setup-python@v3
+      - name: Set up python
+        uses: actions/setup-python@v3
         with:
           python-version: "3.10"
-          architecture: "x64"
+          cache: "pip"
 
-      - run: |
+      - name: Install dependencies
+        with:
+          cache: "pip"
+        run: |
           cd app
           python -m pip install -r requirements.txt
 

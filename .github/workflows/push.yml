@@ -28,7 +28,7 @@ jobs:
           python -m pip install --upgrade pip
           python3 -m pip install pytest
           sudo apt-get install sqlite3
-          python3 -m pip install --upgrade -r requirements.txt
+          python3 -m pip install -r requirements.txt
       - name: Set up Test env
         run: |
           cd app
@@ -88,7 +88,7 @@ jobs:
 
       - run: |
           cd app
-          python -m pip install requirements.txt
+          python -m pip install -r requirements.txt
 
       # Scans the Python env setup by setup-python.
       - uses: pyupio/safety@2.3.4

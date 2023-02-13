@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from typing import Union
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from password_strength import PasswordPolicy
 from jose import jwt, JWTError
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError
@@ -13,6 +14,15 @@ from models.database import User
 from .database import DatabaseHelper
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+password_policy = PasswordPolicy.from_names(
+    length=8,  # min length: 8
+    uppercase=1,  # need min. 1 uppercase letters
+    numbers=1,  # need min. 1 digits
+    special=1,  # need min. 1 special characters
+    # need min. 1 non-letter characters (digits, specials, anything)
+    nonletters=1,
+)
 
 
 class AuthHelper:
@@ -28,6 +38,11 @@ class AuthHelper:
 
         # pylint: disable=C0103
         self.databaseHelper = database_helper
+
+    def validate_password_strength(self, password: str):
+        breaches = password_policy.test(password)
+
+        return len(breaches) == 0
 
     def get_user(self, username: str):
         find_user_sql = "SELECT * FROM user WHERE username = ?"

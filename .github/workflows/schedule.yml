@@ -1,0 +1,36 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Pushes to non-main
+
+on:
+  schedule:
+    cron: "0 13 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          cd app
+          python -m pip install -r requirements.txt
+
+      # Scans the Python env setup by setup-python.
+      - uses: pyupio/safety@2.3.4
+        with:
+          api-key: ${{secrets.SAFETY_API_KEY}}
+          scan: "env"
+          args: "-i 51457 -i 52495"

@@ -62,6 +62,28 @@ class TestAuth:
         password_hash = '$argon2id$v=19$m=65536,t=3,p=NOPE'
         assert authHelper.correct_password(password_hash, 'password') is False
 
+    # Auth::validate_password_strength
+
+    def test_validate_password_strength_valid(self):
+        assert authHelper.validate_password_strength(
+            "Th!sIs@GoodPassword123!") is True
+
+    def test_validate_password_strength_invalid_length(self):
+        assert authHelper.validate_password_strength(
+            "1!Go") is False
+
+    def test_validate_password_strength_invalid_uc(self):
+        assert authHelper.validate_password_strength(
+            "th!sis@foodpassword123!") is False
+
+    def test_validate_password_strength_invalid_numbers(self):
+        assert authHelper.validate_password_strength(
+            "Th!sIs@GoodPassword!") is False
+
+    def test_validate_password_strength_invalid_special(self):
+        assert authHelper.validate_password_strength(
+            "ThisIsAGoodPassword") is False
+
     # Auth::authenticate_user.
 
     def test_authenticate_user_correct_details(self):
@@ -464,17 +486,23 @@ class TestMain():
     def test_create_user(self):
 
         assert main.create_user(request.NewUser(
-            username="newuser", user_password="password", type=2),
+            username="newuser", user_password="Th!sIs@GoodPassword!123", type=2),
             self.test_admin) == {"success": True}
 
     def test_create_user_already_exists(self):
 
         assert main.create_user(request.NewUser(
-            username="testuser", user_password="password", type=2),
+            username="testuser", user_password="Th!sIs@GoodPassword!123", type=2),
             self.test_admin).status_code == 400
 
     def test_create_user_not_authed(self):
 
         assert main.create_user(request.NewUser(
-            username="testuser", user_password="password", type=2),
+            username="testuser", user_password="Th!sIs@GoodPassword!132", type=2),
             self.test_user).status_code == 403
+
+    def test_create_user_invalid_password(self):
+
+        assert main.create_user(request.NewUser(
+            username="testuser", user_password="password", type=2),
+            self.test_admin).status_code == 412

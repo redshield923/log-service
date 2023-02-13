@@ -23,4 +23,4 @@ if [ $? -nq 0 ]; then
     exit 1
 fi
 echo -e "\n${Green}Finished local build of ${Blue}log-service${Green}.${Reset}"
-pipenv run uvicorn main:app --reload --port 8000
+pipenv run uvicorn main:app --reload --port 8000 --ssl-keyfile ./certs/key.pem --ssl-certfile ./certs/cert.pem

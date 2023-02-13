@@ -8,6 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from slowapi.errors import RateLimitExceeded
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
 from utils import validate_index_pattern
 from models import response
 from models import request
@@ -18,11 +21,15 @@ from helpers.log import LogHelper
 from helpers.user import UserHelper
 from config.config import Config
 
+limiter = Limiter(key_func=get_remote_address)
 templates = Jinja2Templates(directory="templates")
 
-
 app = FastAPI(version='0.0.1')
+
+# Mount static directory for html files
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Add middleware and CORS config
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -31,6 +38,10 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+# Add rate-limiting config
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 databaseHelper = DatabaseHelper(Config.DATABASE_PATH)
 authHelper = AuthHelper(Config.SECRET, Config.ALGORITHM, databaseHelper)
 logHelper = LogHelper(databaseHelper)
@@ -38,8 +49,9 @@ userHelper = UserHelper(databaseHelper)
 
 
 @app.get('/')
-def index(req: Request):
-    return templates.TemplateResponse("index.html", {"request": req})
+@limiter.limit("10/minute")
+def index(request: Request):  # pylint: disable=W0621
+    return templates.TemplateResponse("index.html", {"request": request})
 
 
 @app.get('/health', response_model=response.Health)
@@ -188,6 +200,12 @@ def create_user(req: request.NewUser, current_user:
     if current_user.type == 1:
         return HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                              detail="Not authorized to perform this action.")
+
+    if not authHelper.validate_password_strength(req.user_password):
+        return HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED,
+                             detail="""Password must contain one of each:
+                             uppercase letter, lowercase letter, number, special character,
+                             and be at least 8 characters in length.""")
 
     password_sha256 = authHelper.hash_password(req.user_password)
     success = userHelper.create_new_user(

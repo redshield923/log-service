@@ -15,3 +15,9 @@ Upon a commit to any branch but main, [the following actions are run](../.github
 Upon a commit to main, [the following actions are run](../.github/workflows/main.yml). As the above job will have already ran (any pushes to main must come through a MR from a branch that isn't main), all that happens here is that the docker container is built and pushed to the Github Register (ghcr.io). 
 
 ![Main](./images/cicd/main.drawio.png)
+
+## Schedule 
+
+Every week, [the following actions are run](../.github/workflows/schedule.yml). Here, only dependency scanning is run; this will keep alerts up to date on out-of-date dependencies
+
+![Main](./images/cicd/schedule.drawio.png)

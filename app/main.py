@@ -21,7 +21,6 @@ from helpers.log import LogHelper
 from helpers.user import UserHelper
 from config.config import Config
 
-limiter = Limiter(key_func=get_remote_address)
 templates = Jinja2Templates(directory="templates")
 
 app = FastAPI(version='0.0.1')
@@ -39,6 +38,7 @@ app.add_middleware(
 )
 
 # Add rate-limiting config
+limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -83,6 +83,7 @@ def health(current_user: User = Depends(authHelper.get_current_user)):
 
 
 @app.post('/token', status_code=200)
+@limiter.limit("10/minute")
 def token(login_data: Response, form_data: OAuth2PasswordRequestForm = Depends()):
     print(form_data)
     user: User = authHelper.authenticate_user(
@@ -106,11 +107,13 @@ def token(login_data: Response, form_data: OAuth2PasswordRequestForm = Depends()
 
 
 @app.get('/user/me')
+@limiter.limit("10/minute")
 def get_current_user(current_user: request.User = Depends(authHelper.get_current_user)):
     return current_user
 
 
 @app.post('/ingest/')
+@limiter.limit("10/minute")
 def ingest_log(payload: request.LogPayload,
                current_user: request.User = Depends(authHelper.get_current_user)):
 
@@ -124,6 +127,7 @@ def ingest_log(payload: request.LogPayload,
 
 
 @app.get("/index/{index}")
+@limiter.limit("10/minute")
 def get_logs(index_name: str, current_user: request.User = Depends(authHelper.get_current_user)):
 
     if not current_user:
@@ -140,6 +144,7 @@ def get_logs(index_name: str, current_user: request.User = Depends(authHelper.ge
 
 
 @app.get("/index/")
+@limiter.limit("10/minute")
 def get_all_indexes(current_user: request.User = Depends(authHelper.get_current_user)):
 
     if not current_user:
@@ -153,6 +158,7 @@ def get_all_indexes(current_user: request.User = Depends(authHelper.get_current_
 
 
 @app.post("/search/")
+@limiter.limit("10/minute")
 def get_logs_from_pattern(req: request.IndexPatternPayload,
                           current_user: request.User = Depends(authHelper.get_current_user)):
 
@@ -174,6 +180,7 @@ def get_logs_from_pattern(req: request.IndexPatternPayload,
 
 
 @app.delete("/index/{index}")
+@limiter.limit("10/minute")
 def delete_index(index_name: str,
                  current_user: request.User = Depends(authHelper.get_current_user)):
 
@@ -193,6 +200,7 @@ def delete_index(index_name: str,
 # User actions
 
 @app.post("/user")
+@limiter.limit("10/minute")
 def create_user(req: request.NewUser, current_user:
                 request.User = Depends(authHelper.get_current_user)):
 
@@ -219,6 +227,7 @@ def create_user(req: request.NewUser, current_user:
 
 
 @app.put('/password')
+@limiter.limit("10/minute")
 def update_password(req: request.UpdatePassword,
                     current_user: request.User = Depends(authHelper.get_current_user)):
 
@@ -238,6 +247,7 @@ def update_password(req: request.UpdatePassword,
 
 
 @app.delete('/user/{username}')
+@limiter.limit("10/minute")
 def delete_user(username: str, current_user: request.User = Depends(authHelper.get_current_user)):
 
     # Only admins can delete users.
